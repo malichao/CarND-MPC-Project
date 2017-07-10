@@ -1,5 +1,6 @@
 #ifndef UTILS_H
 #define UTILS_H
+#include <cppad/cppad.hpp>
 #include <vector>
 #include "Eigen-3.3/Eigen/Core"
 
@@ -13,6 +14,9 @@ struct WayPoints {
 
 // Evaluate a polynomial.
 double polyeval(Eigen::VectorXd coeffs, double x);
+
+double polyslope(Eigen::VectorXd coeffs, double x);
+CppAD::AD<double> polyslope(Eigen::VectorXd coeffs, CppAD::AD<double> x);
 
 // Fit a polynomial.
 // Adapted from

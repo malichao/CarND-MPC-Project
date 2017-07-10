@@ -2,6 +2,7 @@
 #include <cppad/cppad.hpp>
 #include <cppad/ipopt/solve.hpp>
 #include "Eigen-3.3/Eigen/Core"
+#include "utils.h"
 
 using CppAD::AD;
 
@@ -40,7 +41,7 @@ size_t delta_start = epsi_start + N;
 size_t a_start = delta_start + N - 1;
 
 class FG_eval {
-public:
+ public:
   Eigen::VectorXd coeffs;
   // Coefficients of the fitted polynomial.
   FG_eval(Eigen::VectorXd coeffs) { this->coeffs = coeffs; }
@@ -113,7 +114,7 @@ public:
       AD<double> a0 = vars[a_start + t - 1];
 
       AD<double> f0 = coeffs[0] + coeffs[1] * x0;
-      AD<double> psides0 = CppAD::atan(coeffs[1]);
+      AD<double> psides0 = CppAD::atan(polyslope(coeffs, x0));
 
       // Here's `x` to get you started.
       // The idea here is to constraint this value to be 0.
@@ -138,7 +139,7 @@ MPC::~MPC() {}
 
 vector<double> MPC::Solve(Eigen::VectorXd x0, Eigen::VectorXd coeffs) {
   size_t i;
-  typedef CPPAD_TESTVECTOR(double)Dvector;
+  typedef CPPAD_TESTVECTOR(double) Dvector;
 
   double x = x0[0];
   double y = x0[1];
@@ -241,14 +242,12 @@ vector<double> MPC::Solve(Eigen::VectorXd x0, Eigen::VectorXd coeffs) {
 
   auto cost = solution.obj_value;
   std::cout << "Cost " << cost << std::endl;
-  return { solution.x[x_start + 1],   solution.x[y_start + 1],
-           solution.x[psi_start + 1], solution.x[v_start + 1],
-           solution.x[cte_start + 1], solution.x[epsi_start + 1],
-           solution.x[delta_start],   solution.x[a_start] };
+  return {solution.x[x_start + 1],   solution.x[y_start + 1],
+          solution.x[psi_start + 1], solution.x[v_start + 1],
+          solution.x[cte_start + 1], solution.x[epsi_start + 1],
+          solution.x[delta_start],   solution.x[a_start]};
 }
 
 //
 // Helper functions to fit and evaluate polynomials.
 //
-
-

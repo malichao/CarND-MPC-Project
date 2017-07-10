@@ -1,4 +1,5 @@
 #include "utils.h"
+#include <cppad/cppad.hpp>
 #include "Eigen-3.3/Eigen/Core"
 #include "Eigen-3.3/Eigen/QR"
 void WayPoints::ToEigenVector(Eigen::VectorXd& vec_x, Eigen::VectorXd& vec_y,
@@ -6,7 +7,7 @@ void WayPoints::ToEigenVector(Eigen::VectorXd& vec_x, Eigen::VectorXd& vec_y,
   assert(vec_x.size() == vec_y.size());
   for (int i = 0; i < vec_x.size() && i + start_pos < x.size(); i++) {
     vec_x[i] = x[i + start_pos];
-    vec_y[i] = x[i + start_pos];
+    vec_y[i] = y[i + start_pos];
   }
 }
 
@@ -15,6 +16,24 @@ double polyeval(Eigen::VectorXd coeffs, double x) {
   double result = 0.0;
   for (int i = 0; i < coeffs.size(); i++) {
     result += coeffs[i] * pow(x, i);
+  }
+  return result;
+}
+
+// Evaluate a polynomial slope.
+double polyslope(Eigen::VectorXd coeffs, double x) {
+  double result = 0.0;
+  for (int i = 1; i < coeffs.size(); i++) {
+    result += i * coeffs[i] * pow(x, i - 1);
+  }
+  return result;
+}
+
+// Evaluate a polynomial slope.
+CppAD::AD<double> polyslope(Eigen::VectorXd coeffs, CppAD::AD<double> x) {
+  CppAD::AD<double> result = 0.0;
+  for (int i = 1; i < coeffs.size(); i++) {
+    result += i * coeffs[i] * CppAD::pow(x, i - 1);
   }
   return result;
 }
