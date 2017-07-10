@@ -1,15 +1,10 @@
 #include <fstream>
 #include "MPC.h"
 #include "matplotlibcpp.h"
-
+#include "utils.h"
 namespace plt = matplotlibcpp;
 
-struct WayPoints {
-  std::vector<double> x;
-  std::vector<double> y;
-};
-
-void TestDrawCenterPath(WayPoints& way_points) {
+void TestDrawCenterPath(WayPoints& waypoints) {
   std::string file = "../lake_track_waypoints.csv";
   std::ifstream sin(file);
   std::string line;
@@ -17,15 +12,21 @@ void TestDrawCenterPath(WayPoints& way_points) {
   std::getline(sin, line);
   while (std::getline(sin, line)) {
     //    std::cout << line << "\n";
-    way_points.x.push_back(std::stod(line.substr(0, line.find(',') - 1)));
-    way_points.y.push_back(std::stod(line.substr(line.find(',') + 1)));
+    waypoints.x.push_back(std::stod(line.substr(0, line.find(',') - 1)));
+    waypoints.y.push_back(std::stod(line.substr(line.find(',') + 1)));
   }
-  plt::plot(way_points.x, way_points.y, "r");
+  plt::plot(waypoints.x, waypoints.y, "r");
   plt::show();
 }
 
+void TestMPC(WayPoints& waypoints) {}
+
 int main() {
   // ...
-  WayPoints way_point;
-  TestDrawCenterPath(way_point);
+  WayPoints waypoints;
+  MPC mpc;
+  Eigen::VectorXd x(6);
+  Eigen::VectorXd y(6);
+  waypoints.ToEigenVector(x, y);
+  TestDrawCenterPath(waypoints);
 }
