@@ -2,7 +2,7 @@
 #include <cppad/cppad.hpp>
 #include "Eigen-3.3/Eigen/Core"
 #include "Eigen-3.3/Eigen/QR"
-void WayPoints::ToEigenVector(Eigen::VectorXd& vec_x, Eigen::VectorXd& vec_y,
+void WayPoints::ToEigenVector(Eigen::VectorXd &vec_x, Eigen::VectorXd &vec_y,
                               int start_pos) {
   assert(vec_x.size() == vec_y.size());
   for (int i = 0; i < vec_x.size() && i + start_pos < x.size(); i++) {
@@ -60,4 +60,51 @@ Eigen::VectorXd polyfit(Eigen::VectorXd xvals, Eigen::VectorXd yvals,
   auto Q = A.householderQr();
   auto result = Q.solve(yvals);
   return result;
+}
+
+void rotate(const double &in_x, const double &in_y, double &out_x,
+            double &out_y, const double &theta) {
+  double s = sin(theta);
+  double c = cos(theta);
+
+  out_x = in_x * c - in_y * s;
+  out_y = in_x * s + in_y * c;
+}
+
+void GlobalToLocal(const double &veh_x, const double &veh_y,
+                   const double &veh_psi, const double &in_x,
+                   const double &in_y, double &out_x, double &out_y) {
+  double delta_x = in_x - veh_x;
+  double delta_y = in_y - veh_y;
+  rotate(delta_x, delta_y, out_x, out_y, -veh_psi);
+}
+
+void GlobalToLocal(const double &veh_x, const double &veh_y,
+                   const double &veh_psi, const std::vector<double> &in_x,
+                   const std::vector<double> &in_y, std::vector<double> &out_x,
+                   std::vector<double> &out_y) {
+  assert(in_x.size() == in_y.size() && in_x.size() == out_x.size() &&
+         out_x.size() == out_y.size());
+  for (int i = 0; i < in_x.size(); i++) {
+    GlobalToLocal(veh_x, veh_y, veh_psi, in_x[i], in_y[i], out_x[i], out_y[i]);
+  }
+}
+
+void LocalToGlobal(const double &veh_x, const double &veh_y,
+                   const double &veh_psi, const double &in_x,
+                   const double &in_y, double &out_x, double &out_y) {
+  rotate(in_x, in_y, out_x, out_y, veh_psi);
+  out_x += veh_x;
+  out_y += veh_y;
+}
+
+void LocalToGlobal(const double &veh_x, const double &veh_y,
+                   const double &veh_psi, const std::vector<double> &in_x,
+                   const std::vector<double> &in_y, std::vector<double> &out_x,
+                   std::vector<double> &out_y) {
+  assert(in_x.size() == in_y.size() && in_x.size() == out_x.size() &&
+         out_x.size() == out_y.size());
+  for (int i = 0; i < in_x.size(); i++) {
+    LocalToGlobal(veh_x, veh_y, veh_psi, in_x[i], in_y[i], out_x[i], out_y[i]);
+  }
 }

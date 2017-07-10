@@ -25,13 +25,21 @@ void TestMPC(WayPoints& waypoints) {
   Eigen::VectorXd ptsx(test_size);
   Eigen::VectorXd ptsy(test_size);
   waypoints.ToEigenVector(ptsx, ptsy);
-  auto coeffs = polyfit(ptsx, ptsy, 1);
+  auto coeffs = polyfit(ptsx, ptsy, 3);
   double x = ptsx[0];
   double y = ptsy[0];
   double psi = atan2(ptsy[1] - ptsy[0], ptsx[1] - ptsx[0]);
   double v = 10;
   double cte = polyeval(coeffs, x) - y;
   double epsi = psi - atan(polyslope(coeffs, x));
+
+  std::cout << "Initial state\n"
+            << "x = " << x << "\n"
+            << "y = " << y << "\n"
+            << "psi = " << psi << "\n"
+            << "v = " << v << "\n"
+            << "cte = " << cte << "\n"
+            << "epsi = " << epsi << "\n";
 
   Eigen::VectorXd state(test_size);
   state << x, y, psi, v, cte, epsi;
@@ -89,11 +97,24 @@ void TestMPC(WayPoints& waypoints) {
   //  plt::plot(v_vals);
   //  plt::grid(true);
   //  plt::show();
-  std::vector<double> draw_x(waypoints.x.begin(),
+  std::vector<double> orig_x(waypoints.x.begin(),
                              waypoints.x.begin() + test_size);
-  std::vector<double> draw_y(waypoints.y.begin(),
+  std::vector<double> orig_y(waypoints.y.begin(),
                              waypoints.y.begin() + test_size);
-  plt::plot(draw_x, draw_y, "r--");
+
+  std::vector<double> poly_x;
+  std::vector<double> poly_y;
+  //  for (int i = 0; i < ptsx.size(); i++) {
+  //    poly_x.push_back(ptsx[i]);
+  //    poly_y.push_back(polyeval(coeffs, ptsx[i]));
+  //  }
+  for (double x = 180; x > 120; x -= 5) {
+    poly_x.push_back(x);
+    poly_y.push_back(polyeval(coeffs, x));
+  }
+
+  plt::plot(orig_x, orig_y, "r--");
+  plt::plot(poly_x, poly_y, "r");
   plt::plot(x_vals, y_vals, "b");
 }
 
