@@ -83,6 +83,8 @@ void GlobalToLocal(const double &veh_x, const double &veh_y,
                    const double &veh_psi, const std::vector<double> &in_x,
                    const std::vector<double> &in_y, std::vector<double> &out_x,
                    std::vector<double> &out_y) {
+  out_x.resize(in_x.size());
+  out_y.resize(in_x.size());
   assert(in_x.size() == in_y.size() && in_x.size() == out_x.size() &&
          out_x.size() == out_y.size());
   for (int i = 0; i < in_x.size(); i++) {
@@ -93,15 +95,18 @@ void GlobalToLocal(const double &veh_x, const double &veh_y,
 void LocalToGlobal(const double &veh_x, const double &veh_y,
                    const double &veh_psi, const double &in_x,
                    const double &in_y, double &out_x, double &out_y) {
-  rotate(in_x, in_y, out_x, out_y, veh_psi);
-  out_x += veh_x;
-  out_y += veh_y;
+  double out_x_, out_y_;
+  rotate(in_x, in_y, out_x_, out_y_, veh_psi);
+  out_x = out_x_ + veh_x;
+  out_y = out_y_ + veh_y;
 }
 
 void LocalToGlobal(const double &veh_x, const double &veh_y,
                    const double &veh_psi, const std::vector<double> &in_x,
                    const std::vector<double> &in_y, std::vector<double> &out_x,
                    std::vector<double> &out_y) {
+  out_x.resize(in_x.size());
+  out_y.resize(in_x.size());
   assert(in_x.size() == in_y.size() && in_x.size() == out_x.size() &&
          out_x.size() == out_y.size());
   for (int i = 0; i < in_x.size(); i++) {

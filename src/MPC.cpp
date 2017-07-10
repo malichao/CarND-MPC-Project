@@ -10,7 +10,7 @@ using CppAD::AD;
 // and the timestep evaluation frequency or evaluation
 // period to 0.05.
 size_t N = 25;
-double dt = 0.1;
+double dt = 0.05;
 
 // This value assumes the model presented in the classroom is used.
 //

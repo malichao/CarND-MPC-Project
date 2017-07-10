@@ -26,26 +26,35 @@ void TestMPC(WayPoints& waypoints) {
   Eigen::VectorXd ptsy(test_size);
   waypoints.ToEigenVector(ptsx, ptsy);
   auto coeffs = polyfit(ptsx, ptsy, 3);
-  double x = ptsx[0];
-  double y = ptsy[0];
-  double psi = atan2(ptsy[1] - ptsy[0], ptsx[1] - ptsx[0]);
+  //  double x = ptsx[0];
+  //  double y = ptsy[0];
+  //  double psi = atan2(ptsy[1] - ptsy[0], ptsx[1] - ptsx[0]);
+  //  double v = 10;
+  //  double cte = polyeval(coeffs, x) - y;
+  //  double epsi = psi - atan(polyslope(coeffs, x));
+  double x_global = ptsx[0];
+  double y_global = ptsy[0];
+  double psi_offset = atan2(ptsy[1] - ptsy[0], ptsx[1] - ptsx[0]);
+  double x = 0;
+  double y = 0;
+  double psi = 0;
   double v = 10;
   double cte = polyeval(coeffs, x) - y;
-  double epsi = psi - atan(polyslope(coeffs, x));
+  double epsi = psi_offset - atan(polyslope(coeffs, x));
 
-  std::cout << "Initial state\n"
-            << "x = " << x << "\n"
-            << "y = " << y << "\n"
-            << "psi = " << psi << "\n"
-            << "v = " << v << "\n"
-            << "cte = " << cte << "\n"
-            << "epsi = " << epsi << "\n";
+  //  std::cout << "Initial state\n"
+  //            << "x = " << x << "\n"
+  //            << "y = " << y << "\n"
+  //            << "psi = " << psi << "\n"
+  //            << "v = " << v << "\n"
+  //            << "cte = " << cte << "\n"
+  //            << "epsi = " << epsi << "\n";
 
   Eigen::VectorXd state(test_size);
   state << x, y, psi, v, cte, epsi;
 
-  std::vector<double> x_vals = {state[0]};
-  std::vector<double> y_vals = {state[1]};
+  std::vector<double> x_vals = {x_global};
+  std::vector<double> y_vals = {y_global};
   std::vector<double> psi_vals = {state[2]};
   std::vector<double> v_vals = {state[3]};
   std::vector<double> cte_vals = {state[4]};
@@ -53,14 +62,22 @@ void TestMPC(WayPoints& waypoints) {
   std::vector<double> delta_vals = {};
   std::vector<double> a_vals = {};
 
-  int test_iterations = 50;
+  int test_iterations = 30;
+  WayPoints waypoints_local;
+  Eigen::VectorXd ptsx_local(test_size);
+  Eigen::VectorXd ptsy_local(test_size);
   for (size_t i = 0; i < test_iterations; i++) {
     std::cout << "Iteration " << i << std::endl;
-
+    GlobalToLocal(x_global, y_global, psi_offset + state[2], waypoints.x,
+                  waypoints.y, waypoints_local.x, waypoints_local.y);
+    waypoints_local.ToEigenVector(ptsx_local, ptsy_local);
+    auto coeffs = polyfit(ptsx_local, ptsy_local, 3);
     auto vars = mpc.Solve(state, coeffs);
 
-    x_vals.push_back(vars[0]);
-    y_vals.push_back(vars[1]);
+    LocalToGlobal(x_global, y_global, psi_offset + state[2], vars[0], vars[1],
+                  x_global, y_global);
+    x_vals.push_back(x_global);
+    y_vals.push_back(y_global);
     psi_vals.push_back(vars[2]);
     v_vals.push_back(vars[3]);
     cte_vals.push_back(vars[4]);
@@ -70,15 +87,15 @@ void TestMPC(WayPoints& waypoints) {
     a_vals.push_back(vars[7]);
 
     state << vars[0], vars[1], vars[2], vars[3], vars[4], vars[5];
-    std::cout << "x = " << vars[0] << std::endl;
-    std::cout << "y = " << vars[1] << std::endl;
-    std::cout << "psi = " << vars[2] << std::endl;
-    std::cout << "v = " << vars[3] << std::endl;
-    std::cout << "cte = " << vars[4] << std::endl;
-    std::cout << "epsi = " << vars[5] << std::endl;
-    std::cout << "delta = " << vars[6] << std::endl;
-    std::cout << "a = " << vars[7] << std::endl;
-    std::cout << std::endl;
+    //    std::cout << "x = " << x_global << std::endl;
+    //    std::cout << "y = " << y_global << std::endl;
+    //    std::cout << "psi = " << vars[2] << std::endl;
+    //    std::cout << "v = " << vars[3] << std::endl;
+    //    std::cout << "cte = " << vars[4] << std::endl;
+    //    std::cout << "epsi = " << vars[5] << std::endl;
+    //    std::cout << "delta = " << vars[6] << std::endl;
+    //    std::cout << "a = " << vars[7] << std::endl;
+    //    std::cout << std::endl;
   }
 
   // Plot values
@@ -97,6 +114,7 @@ void TestMPC(WayPoints& waypoints) {
   //  plt::plot(v_vals);
   //  plt::grid(true);
   //  plt::show();
+
   std::vector<double> orig_x(waypoints.x.begin(),
                              waypoints.x.begin() + test_size);
   std::vector<double> orig_y(waypoints.y.begin(),
