@@ -20,11 +20,12 @@ void TestDrawCenterPath(WayPoints& waypoints) {
 }
 
 void TestMPC(WayPoints& waypoints) {
-  int test_size = 6;
+  int test_size = 8;
+  int test_offset = 0;
   MPC mpc;
   Eigen::VectorXd ptsx(test_size);
   Eigen::VectorXd ptsy(test_size);
-  waypoints.ToEigenVector(ptsx, ptsy);
+  waypoints.ToEigenVector(ptsx, ptsy, test_offset);
   auto coeffs = polyfit(ptsx, ptsy, 3);
   //  double x = ptsx[0];
   //  double y = ptsy[0];
@@ -50,7 +51,7 @@ void TestMPC(WayPoints& waypoints) {
   //            << "cte = " << cte << "\n"
   //            << "epsi = " << epsi << "\n";
 
-  Eigen::VectorXd state(test_size);
+  Eigen::VectorXd state(6);
   state << x, y, psi, v, cte, epsi;
 
   std::vector<double> x_vals = {x_global};
@@ -62,7 +63,7 @@ void TestMPC(WayPoints& waypoints) {
   std::vector<double> delta_vals = {};
   std::vector<double> a_vals = {};
 
-  int test_iterations = 30;
+  int test_iterations = 20;
   WayPoints waypoints_local;
   Eigen::VectorXd ptsx_local(test_size);
   Eigen::VectorXd ptsy_local(test_size);
@@ -70,7 +71,7 @@ void TestMPC(WayPoints& waypoints) {
     std::cout << "Iteration " << i << std::endl;
     GlobalToLocal(x_global, y_global, psi_offset + state[2], waypoints.x,
                   waypoints.y, waypoints_local.x, waypoints_local.y);
-    waypoints_local.ToEigenVector(ptsx_local, ptsy_local);
+    waypoints_local.ToEigenVector(ptsx_local, ptsy_local, test_offset);
     auto coeffs = polyfit(ptsx_local, ptsy_local, 3);
     auto vars = mpc.Solve(state, coeffs);
 
@@ -115,10 +116,10 @@ void TestMPC(WayPoints& waypoints) {
   //  plt::grid(true);
   //  plt::show();
 
-  std::vector<double> orig_x(waypoints.x.begin(),
-                             waypoints.x.begin() + test_size);
-  std::vector<double> orig_y(waypoints.y.begin(),
-                             waypoints.y.begin() + test_size);
+  std::vector<double> orig_x(waypoints.x.begin() + test_offset,
+                             waypoints.x.begin() + test_offset + test_size);
+  std::vector<double> orig_y(waypoints.y.begin() + test_offset,
+                             waypoints.y.begin() + test_offset + test_size);
 
   std::vector<double> poly_x;
   std::vector<double> poly_y;
@@ -126,9 +127,11 @@ void TestMPC(WayPoints& waypoints) {
   //    poly_x.push_back(ptsx[i]);
   //    poly_y.push_back(polyeval(coeffs, ptsx[i]));
   //  }
-  for (double x = 180; x > 120; x -= 5) {
+  double step = (ptsx[ptsx.size() - 1] - ptsx[0]) / 20;
+  for (double x = ptsx[0], i = 0; i < 20; i++) {
     poly_x.push_back(x);
     poly_y.push_back(polyeval(coeffs, x));
+    x += step;
   }
 
   plt::plot(orig_x, orig_y, "r--");

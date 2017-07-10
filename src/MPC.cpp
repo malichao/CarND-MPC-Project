@@ -9,7 +9,7 @@ using CppAD::AD;
 // We set the number of timesteps to 25
 // and the timestep evaluation frequency or evaluation
 // period to 0.05.
-size_t N = 25;
+size_t N = 30;
 double dt = 0.05;
 
 // This value assumes the model presented in the classroom is used.
@@ -56,7 +56,7 @@ class FG_eval {
 
     // The part of the cost based on the reference state.
     for (int t = 0; t < N; t++) {
-      fg[0] += CppAD::pow(vars[cte_start + t], 2);
+      fg[0] += 200 * CppAD::pow(vars[cte_start + t], 2);
       fg[0] += CppAD::pow(vars[epsi_start + t], 2);
       fg[0] += CppAD::pow(vars[v_start + t] - ref_v, 2);
     }
