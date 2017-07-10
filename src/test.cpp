@@ -4,9 +4,12 @@
 
 namespace plt = matplotlibcpp;
 
-void TestDrawCenterPath() {
-  std::vector<double> in_x;
-  std::vector<double> in_y;
+struct WayPoints {
+  std::vector<double> x;
+  std::vector<double> y;
+};
+
+void TestDrawCenterPath(WayPoints& way_points) {
   std::string file = "../lake_track_waypoints.csv";
   std::ifstream sin(file);
   std::string line;
@@ -14,15 +17,15 @@ void TestDrawCenterPath() {
   std::getline(sin, line);
   while (std::getline(sin, line)) {
     //    std::cout << line << "\n";
-    std::string x, y;
-    in_x.push_back(std::stod(line.substr(0, line.find(',') - 1)));
-    in_y.push_back(std::stod(line.substr(line.find(',') + 1)));
+    way_points.x.push_back(std::stod(line.substr(0, line.find(',') - 1)));
+    way_points.y.push_back(std::stod(line.substr(line.find(',') + 1)));
   }
-  plt::plot(in_x, in_y, "r");
+  plt::plot(way_points.x, way_points.y, "r");
   plt::show();
 }
 
 int main() {
   // ...
-  TestDrawCenterPath();
+  WayPoints way_point;
+  TestDrawCenterPath(way_point);
 }
