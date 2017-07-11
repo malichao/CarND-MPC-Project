@@ -42,7 +42,7 @@ void TestMPC(WayPoints& waypoints) {
     y_vals.push_back(veh.y);
     veh.x = mpc.Predictions().x[1];
     veh.y = mpc.Predictions().y[1];
-    //    veh.psi = mpc.Predictions().psi[1];
+    veh.psi = mpc.Predictions().psi[1];
     std::cout << "x = " << veh.x << "\n"
               << "y = " << veh.y << "\n"
               << "psi = " << veh.psi << "\n"

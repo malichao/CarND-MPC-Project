@@ -245,6 +245,7 @@ vector<double> MPC::Solve(Eigen::VectorXd x0, Eigen::VectorXd coeffs) {
   throttle_m = solution.x[a_start];
   waypoints_m.x.resize(N);
   waypoints_m.y.resize(N);
+  waypoints_m.psi.resize(N);
   for (int i = 0; i < N; i++) {
     waypoints_m.x[i] = solution.x[x_start + i];
     waypoints_m.y[i] = solution.x[y_start + i];
