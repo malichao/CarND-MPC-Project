@@ -33,8 +33,8 @@ void LocalToGlobal(const double& veh_x, const double& veh_y,
                    const std::vector<double>& in_y, std::vector<double>& out_x,
                    std::vector<double>& out_y);
 
-void ProcessData(MPC& mpc, const WayPoints& waypoints, WayPoints& future_path,
-                 Vehicle& veh);
+void ProcessData(MPC& mpc, const WayPoints& waypoints,
+                 const Vehicle &veh);
 // Fit a polynomial.
 // Adapted from
 // https://github.com/JuliaMath/Polynomials.jl/blob/master/src/Polynomials.jl#L676-L716

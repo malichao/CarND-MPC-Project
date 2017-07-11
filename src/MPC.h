@@ -15,14 +15,22 @@ class MPC {
   // Return the first actuatotions.
   std::vector<double> Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs);
 
+  void SetReference(const WayPoints& ref);
+
   const double Steer();
+
   const double Throttle();
-  const WayPoints& Predictions();
+
+  // Predicted vehicle trajectory in vehicle's LOCAL coordinate
+  const WayPoints& Prediction() const;
+
+  // Reference trajectory in vehicle's LOCAL coordinate
+  const WayPoints& Reference() const;
 
  private:
   double steering_m;
   double throttle_m;
-  WayPoints waypoints_m;
+  WayPoints prediction_m,reference_m;
 };
 
 #endif /* MPC_H */

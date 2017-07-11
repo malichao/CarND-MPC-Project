@@ -16,7 +16,7 @@ double polyeval(Eigen::VectorXd coeffs, double x) {
 double polyslope(Eigen::VectorXd coeffs, double x) {
   double result = 0.0;
   for (int i = 1; i < coeffs.size(); i++) {
-    result += i * coeffs[i] * pow(x, i - 1);
+    result += coeffs[i] * pow(x, i - 1);
   }
   return result;
 }
@@ -25,7 +25,7 @@ double polyslope(Eigen::VectorXd coeffs, double x) {
 CppAD::AD<double> polyslope(Eigen::VectorXd coeffs, CppAD::AD<double> x) {
   CppAD::AD<double> result = 0.0;
   for (int i = 1; i < coeffs.size(); i++) {
-    result += i * coeffs[i] * CppAD::pow(x, i - 1);
+    result += coeffs[i] * CppAD::pow(x, i - 1);
   }
   return result;
 }
@@ -106,24 +106,23 @@ void LocalToGlobal(const double &veh_x, const double &veh_y,
   }
 }
 
-void ProcessData(MPC &mpc, const WayPoints &waypoints, WayPoints &future_path,
-                 Vehicle &veh) {
+void ProcessData(MPC &mpc, const WayPoints &waypoints, const Vehicle &veh) {
   WayPoints waypoints_local;
   Eigen::VectorXd ptsx_local(waypoints.x.size());
   Eigen::VectorXd ptsy_local(waypoints.x.size());
   Eigen::VectorXd state(6);
   GlobalToLocal(veh.x, veh.y, veh.psi, waypoints.x, waypoints.y,
                 waypoints_local.x, waypoints_local.y);
+  mpc.SetReference(waypoints_local);
   waypoints_local.ToEigenVector(ptsx_local, ptsy_local);
   auto coeffs = polyfit(ptsx_local, ptsy_local, 3);
   double cte = polyeval(coeffs, 0);
   double epsi = 0 - atan(polyslope(coeffs, 0));
   state << 0, 0, 0, veh.v, cte, epsi;
   mpc.Solve(state, coeffs);
-  LocalToGlobal(veh.x, veh.y, veh.psi, mpc.Predictions().x, mpc.Predictions().y,
-                future_path.x, future_path.y);
-  veh.steer = mpc.Steer();
-  veh.throttle = mpc.Throttle();
   //  std::cout << "Steer, throttle = " << veh.steer << "," << veh.throttle <<
   //  "\n";
 }
+
+typedef std::vector<std::vector<int>> ImageArray;
+

@@ -57,7 +57,7 @@ class FG_eval {
     // The part of the cost based on the reference state.
     for (int t = 0; t < N; t++) {
       fg[0] += 100 * CppAD::pow(vars[cte_start + t], 2);
-      fg[0] += 100 * CppAD::pow(vars[epsi_start + t], 2);
+      fg[0] += CppAD::pow(vars[epsi_start + t], 2);
       fg[0] += CppAD::pow(vars[v_start + t] - ref_v, 2);
     }
 
@@ -69,8 +69,8 @@ class FG_eval {
 
     // Minimize the value gap between sequential actuations.
     for (int t = 0; t < N - 2; t++) {
-      fg[0] += CppAD::pow(vars[delta_start + t + 1] - vars[delta_start + t], 2);
-      fg[0] += CppAD::pow(vars[a_start + t + 1] - vars[a_start + t], 2);
+      fg[0] += 100 *CppAD::pow(vars[delta_start + t + 1] - vars[delta_start + t], 2);
+      fg[0] += 100 *CppAD::pow(vars[a_start + t + 1] - vars[a_start + t], 2);
     }
 
     //
@@ -243,25 +243,35 @@ vector<double> MPC::Solve(Eigen::VectorXd x0, Eigen::VectorXd coeffs) {
   //  std::cout << "Cost " << cost << std::endl;
   steering_m = solution.x[delta_start];
   throttle_m = solution.x[a_start];
-  waypoints_m.x.resize(N);
-  waypoints_m.y.resize(N);
-  waypoints_m.psi.resize(N);
+  prediction_m.x.resize(N);
+  prediction_m.y.resize(N);
+  prediction_m.psi.resize(N);
   for (int i = 0; i < N; i++) {
-    waypoints_m.x[i] = solution.x[x_start + i];
-    waypoints_m.y[i] = solution.x[y_start + i];
-    waypoints_m.psi[i] = solution.x[psi_start + i];
+    prediction_m.x[i] = solution.x[x_start + i];
+    prediction_m.y[i] = solution.x[y_start + i];
+    prediction_m.psi[i] = solution.x[psi_start + i];
   }
   return {solution.x[x_start + 1],   solution.x[y_start + 1],
           solution.x[psi_start + 1], solution.x[v_start + 1],
           solution.x[cte_start + 1], solution.x[epsi_start + 1],
-          solution.x[delta_start],   solution.x[a_start]};
+              solution.x[delta_start],   solution.x[a_start]};
+}
+
+void MPC::SetReference(const WayPoints &ref)
+{
+    reference_m=ref;
 }
 
 const double MPC::Steer() { return steering_m; }
 
 const double MPC::Throttle() { return throttle_m; }
 
-const WayPoints &MPC::Predictions() { return waypoints_m; }
+const WayPoints &MPC::Prediction() const { return prediction_m; }
+
+const WayPoints &MPC::Reference() const
+{
+    return reference_m;
+}
 
 //
 // Helper functions to fit and evaluate polynomials.
