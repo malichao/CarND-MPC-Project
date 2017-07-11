@@ -137,6 +137,7 @@ void TestMPC(WayPoints& waypoints) {
   plt::plot(orig_x, orig_y, "r--");
   plt::plot(poly_x, poly_y, "r");
   plt::plot(x_vals, y_vals, "b");
+  plt::grid(true);
 }
 
 int main() {

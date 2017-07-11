@@ -3,8 +3,7 @@
 
 #include <vector>
 #include "Eigen-3.3/Eigen/Core"
-
-using namespace std;
+#include "utils.h"
 
 class MPC {
  public:
@@ -14,7 +13,16 @@ class MPC {
 
   // Solve the model given an initial state and polynomial coefficients.
   // Return the first actuatotions.
-  vector<double> Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs);
+  std::vector<double> Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs);
+
+  const double Steer();
+  const double Throttle();
+  const WayPoints& Predictions();
+
+ private:
+  double steering_m;
+  double throttle_m;
+  WayPoints waypoints_m;
 };
 
 #endif /* MPC_H */

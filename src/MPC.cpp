@@ -5,7 +5,7 @@
 #include "utils.h"
 
 using CppAD::AD;
-
+using namespace std;
 // We set the number of timesteps to 25
 // and the timestep evaluation frequency or evaluation
 // period to 0.05.
@@ -56,14 +56,14 @@ class FG_eval {
 
     // The part of the cost based on the reference state.
     for (int t = 0; t < N; t++) {
-      fg[0] += 200 * CppAD::pow(vars[cte_start + t], 2);
-      fg[0] += CppAD::pow(vars[epsi_start + t], 2);
+      fg[0] += 100 * CppAD::pow(vars[cte_start + t], 2);
+      fg[0] += 100 * CppAD::pow(vars[epsi_start + t], 2);
       fg[0] += CppAD::pow(vars[v_start + t] - ref_v, 2);
     }
 
     // Minimize the use of actuators.
     for (int t = 0; t < N - 1; t++) {
-      fg[0] += CppAD::pow(vars[delta_start + t], 2);
+      fg[0] += 100 * CppAD::pow(vars[delta_start + t], 2);
       fg[0] += CppAD::pow(vars[a_start + t], 2);
     }
 
@@ -240,12 +240,26 @@ vector<double> MPC::Solve(Eigen::VectorXd x0, Eigen::VectorXd coeffs) {
   ok &= solution.status == CppAD::ipopt::solve_result<Dvector>::success;
 
   auto cost = solution.obj_value;
-  std::cout << "Cost " << cost << std::endl;
+  //  std::cout << "Cost " << cost << std::endl;
+  steering_m = solution.x[delta_start];
+  throttle_m = solution.x[a_start];
+  waypoints_m.x.resize(N);
+  waypoints_m.y.resize(N);
+  for (int i = 0; i < N; i++) {
+    waypoints_m.x[i] = solution.x[x_start + i];
+    waypoints_m.y[i] = solution.x[y_start + i];
+  }
   return {solution.x[x_start + 1],   solution.x[y_start + 1],
           solution.x[psi_start + 1], solution.x[v_start + 1],
           solution.x[cte_start + 1], solution.x[epsi_start + 1],
           solution.x[delta_start],   solution.x[a_start]};
 }
+
+const double MPC::Steer() { return steering_m; }
+
+const double MPC::Throttle() { return throttle_m; }
+
+const WayPoints &MPC::Predictions() { return waypoints_m; }
 
 //
 // Helper functions to fit and evaluate polynomials.

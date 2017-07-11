@@ -12,6 +12,15 @@ struct WayPoints {
                      int start_pos = 0);
 };
 
+struct Vehicle{
+    double x;
+    double y;
+    double psi;
+    double v;
+    double steer;
+    double throttle;
+};
+
 // Evaluate a polynomial.
 double polyeval(Eigen::VectorXd coeffs, double x);
 
