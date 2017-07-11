@@ -3,7 +3,7 @@
 
 #include <vector>
 #include "Eigen-3.3/Eigen/Core"
-#include "utils.h"
+#include "waypoints.h"
 
 class MPC {
  public:

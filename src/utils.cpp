@@ -2,14 +2,6 @@
 #include <cppad/cppad.hpp>
 #include "Eigen-3.3/Eigen/Core"
 #include "Eigen-3.3/Eigen/QR"
-void WayPoints::ToEigenVector(Eigen::VectorXd &vec_x, Eigen::VectorXd &vec_y,
-                              int start_pos) {
-  assert(vec_x.size() == vec_y.size());
-  for (int i = 0; i < vec_x.size() && i + start_pos < x.size(); i++) {
-    vec_x[i] = x[i + start_pos];
-    vec_y[i] = y[i + start_pos];
-  }
-}
 
 // Evaluate a polynomial.
 double polyeval(Eigen::VectorXd coeffs, double x) {
@@ -112,4 +104,26 @@ void LocalToGlobal(const double &veh_x, const double &veh_y,
   for (int i = 0; i < in_x.size(); i++) {
     LocalToGlobal(veh_x, veh_y, veh_psi, in_x[i], in_y[i], out_x[i], out_y[i]);
   }
+}
+
+void ProcessData(MPC &mpc, const WayPoints &waypoints, WayPoints &future_path,
+                 Vehicle &veh) {
+  WayPoints waypoints_local;
+  Eigen::VectorXd ptsx_local(waypoints.x.size());
+  Eigen::VectorXd ptsy_local(waypoints.x.size());
+  Eigen::VectorXd state(6);
+  GlobalToLocal(veh.x, veh.y, veh.psi, waypoints.x, waypoints.y,
+                waypoints_local.x, waypoints_local.y);
+  waypoints_local.ToEigenVector(ptsx_local, ptsy_local);
+  auto coeffs = polyfit(ptsx_local, ptsy_local, 3);
+  double cte = polyeval(coeffs, 0);
+  double epsi = 0 - atan(polyslope(coeffs, 0));
+  state << 0, 0, 0, veh.v, cte, epsi;
+  mpc.Solve(state, coeffs);
+  LocalToGlobal(veh.x, veh.y, veh.psi, mpc.Predictions().x, mpc.Predictions().y,
+                future_path.x, future_path.y);
+  veh.steer = mpc.Steer();
+  veh.throttle = mpc.Throttle();
+  //  std::cout << "Steer, throttle = " << veh.steer << "," << veh.throttle <<
+  //  "\n";
 }
