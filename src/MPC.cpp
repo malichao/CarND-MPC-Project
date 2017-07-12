@@ -38,6 +38,7 @@ class FG_eval {
     // The cost is stored is the first element of `fg`.
     // Any additions to the cost should be added to `fg[0]`.
     fg[0] = 0;
+    //    AD<double> test = fg[0];
 
     // The part of the cost based on the reference state.
     for (size_t t = 0; t < N; t++) {
@@ -46,11 +47,17 @@ class FG_eval {
       fg[0] += config_m->v_w * CppAD::pow(vars[v_start + t] - ref_v, 2);
     }
 
+    //    std::cout << fg[0] - test << " ";
+    //    test = fg[0];
+
     // Minimize the use of actuators.
     for (size_t t = 0; t < N - 1; t++) {
       fg[0] += config_m->delta_w * CppAD::pow(vars[delta_start + t], 2);
       fg[0] += config_m->acc_w * CppAD::pow(vars[a_start + t], 2);
     }
+
+    //    std::cout << fg[0] - test << " ";
+    //    test = fg[0];
 
     // Minimize the value gap between sequential actuations.
     for (size_t t = 0; t < N - 2; t++) {
@@ -59,6 +66,8 @@ class FG_eval {
       fg[0] += config_m->acc_dot_w *
                CppAD::pow(vars[a_start + t + 1] - vars[a_start + t], 2);
     }
+
+    //    std::cout << fg[0] - test << "  ";
 
     // Setup Constraints
 
@@ -237,7 +246,6 @@ vector<double> MPC::Solve(const Vehicle& veh, Eigen::VectorXd coeffs) {
   bool ok = true;
   ok &= solution.status == CppAD::ipopt::solve_result<Dvector>::success;
 
-  if (!ok) std::cout << "Solution not found\n";
   //  auto cost = solution.obj_value;
   //  std::cout << "Cost " << cost << std::endl;
   steering_m = solution.x[delta_start];

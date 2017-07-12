@@ -34,6 +34,9 @@ void LocalToGlobal(const double& veh_x, const double& veh_y,
                    const std::vector<double>& in_y, std::vector<double>& out_x,
                    std::vector<double>& out_y);
 
+double WrapHeading(const double& heading);
+CppAD::AD<double> WrapHeading(const CppAD::AD<double>& heading);
+
 void ProcessData(MPC& mpc, const WayPoints& waypoints, const Vehicle& veh);
 // Fit a polynomial.
 // Adapted from

@@ -146,3 +146,15 @@ void ProcessData(MPC &mpc, const WayPoints &waypoints, const Vehicle &veh) {
 }
 
 typedef std::vector<std::vector<int>> ImageArray;
+
+double WrapHeading(const double &heading) {
+  double x = cos(heading);
+  double y = sin(heading);
+  return atan2(y, x);
+}
+
+CppAD::AD<double> WrapHeading(const CppAD::AD<double> &heading) {
+  CppAD::AD<double> x = CppAD::cos(heading);
+  CppAD::AD<double> y = CppAD::sin(heading);
+  return CppAD::atan2(y, x);
+}

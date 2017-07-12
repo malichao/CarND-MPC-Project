@@ -10,12 +10,19 @@ void TestDrawCenterPath(WayPoints& waypoints) {
   std::string line;
   // Discard the first line
   std::getline(sin, line);
+  int i = 0;
+  WayPoints temp;
   while (std::getline(sin, line)) {
     //    std::cout << line << "\n";
     waypoints.x.push_back(std::stod(line.substr(0, line.find(',') - 1)));
     waypoints.y.push_back(std::stod(line.substr(line.find(',') + 1)));
+    if (i++ % 10 == 0) {
+      temp.x.push_back(waypoints.x.back());
+      temp.y.push_back(waypoints.y.back());
+    }
   }
   //  plt::plot(waypoints.x, waypoints.y, "r--");
+  //  plt::plot(temp.x, temp.y, "g*");
   //  plt::show();
 }
 
@@ -46,7 +53,7 @@ void TestMPC(WayPoints& waypoints) {
   //  printf("heading:
   //  %.2f\n",atan2(polyeval(coeffs,waypoints.x[1])-polyeval(coeffs,waypoints.x[0]),
   //                                 waypoints.x[1]-waypoints.x[0]));
-  veh.V() = 40;
+  veh.V() = 70;
   std::vector<double> x_vals, y_vals;
   WayPoints future_path;
   size_t test_iterations = 1;
@@ -80,7 +87,7 @@ int main() {
   // ...
   WayPoints waypoints;
   TestDrawCenterPath(waypoints);
-  size_t test_offset = 60;
+  size_t test_offset = 51;
   size_t test_size = 6;
   WayPoints test_waypoints;
   test_waypoints.x = std::vector<double>(&waypoints.x[test_offset],

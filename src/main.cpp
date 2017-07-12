@@ -81,9 +81,6 @@ int main(int argc, char** argv) {
   //  mpc_config.WriteConfig("../config/test.cfg");
   MPC mpc(mpc_config);
 
-  Vehicle veh1;
-  std::cout << "size = " << sizeof(veh1) << "\n";
-
   h.onMessage([&mpc](uWS::WebSocket<uWS::SERVER> ws, char* data, size_t length,
                      uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message
@@ -100,13 +97,15 @@ int main(int argc, char** argv) {
         string event = j[0].get<string>();
         if (event == "telemetry") {
           // j[1] is the data JSON object
-          double t1 = j[1]["psi"], t2 = j[1]["psi_unity"];
-          printf("psi,psi_u [%.2f,%.2f]\n", t1, t2);
+          //          double t1 = WrapHeading(j[1]["psi"]), t2 =
+          //          j[1]["psi_unity"];
+          //          printf("psi,psi_u [%.2f,%.2f]\n", t1, t2);
           WayPoints waypoints{j[1]["ptsx"], j[1]["ptsy"]};
           Vehicle veh;
           veh.X() = j[1]["x"];
           veh.Y() = j[1]["y"];
           veh.Psi() = j[1]["psi"];
+          veh.Psi() = WrapHeading(veh.Psi());
           veh.V() = j[1]["speed"];
           veh.Steer() = ToMPCSteer(j[1]["steering_angle"]);
           veh.Throttle() = j[1]["throttle"];
