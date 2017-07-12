@@ -6,21 +6,11 @@
 
 using CppAD::AD;
 using namespace std;
-// We set the number of timesteps to 25
-// and the timestep evaluation frequency or evaluation
-// period to 0.05.
+
+// number of timesteps to 25
 size_t N = 30;
 double dt = 0.05;
 
-// This value assumes the model presented in the classroom is used.
-//
-// It was obtained by measuring the radius formed by running the vehicle in the
-// simulator around in a circle with a constant steering angle and velocity on a
-// flat terrain.
-//
-// Lf was tuned until the the radius formed by the simulating the model
-// presented in the classroom matched the previous radius.
-//
 // This is the length from front to CoG that has a similar radius.
 const double Lf = 2.67;
 
@@ -47,6 +37,7 @@ class FG_eval {
   FG_eval(Eigen::VectorXd coeffs) { this->coeffs = coeffs; }
 
   typedef CPPAD_TESTVECTOR(AD<double>) ADvector;
+
   // `fg` is a vector containing the cost and constraints.
   // `vars` is a vector containing the variable values (state & actuators).
   void operator()(ADvector &fg, const ADvector &vars) {
@@ -69,17 +60,14 @@ class FG_eval {
 
     // Minimize the value gap between sequential actuations.
     for (int t = 0; t < N - 2; t++) {
-      fg[0] += 5000 *CppAD::pow(vars[delta_start + t + 1] - vars[delta_start + t], 2);
-      fg[0] += 100 *CppAD::pow(vars[a_start + t + 1] - vars[a_start + t], 2);
+      fg[0] += 5000 *
+               CppAD::pow(vars[delta_start + t + 1] - vars[delta_start + t], 2);
+      fg[0] += 100 * CppAD::pow(vars[a_start + t + 1] - vars[a_start + t], 2);
     }
 
-    //
     // Setup Constraints
-    //
-    // NOTE: In this section you'll setup the model constraints.
 
     // Initial constraints
-    //
     // We add 1 to each of the starting indices due to cost being located at
     // index 0 of `fg`.
     // This bumps up the position of all the other values.
@@ -112,7 +100,7 @@ class FG_eval {
       AD<double> delta0 = vars[delta_start + t - 1];
       AD<double> a0 = vars[a_start + t - 1];
 
-      AD<double> f0 = polyeval(coeffs,x0);
+      AD<double> f0 = polyeval(coeffs, x0);
       AD<double> psides0 = CppAD::atan(polyslope(coeffs, x0));
 
       // Here's `x` to get you started.
@@ -254,13 +242,10 @@ vector<double> MPC::Solve(Eigen::VectorXd x0, Eigen::VectorXd coeffs) {
   return {solution.x[x_start + 1],   solution.x[y_start + 1],
           solution.x[psi_start + 1], solution.x[v_start + 1],
           solution.x[cte_start + 1], solution.x[epsi_start + 1],
-              solution.x[delta_start],   solution.x[a_start]};
+          solution.x[delta_start],   solution.x[a_start]};
 }
 
-void MPC::SetReference(const WayPoints &ref)
-{
-    reference_m=ref;
-}
+void MPC::SetReference(const WayPoints &ref) { reference_m = ref; }
 
 const double MPC::Steer() { return steering_m; }
 
@@ -268,10 +253,7 @@ const double MPC::Throttle() { return throttle_m; }
 
 const WayPoints &MPC::Prediction() const { return prediction_m; }
 
-const WayPoints &MPC::Reference() const
-{
-    return reference_m;
-}
+const WayPoints &MPC::Reference() const { return reference_m; }
 
 //
 // Helper functions to fit and evaluate polynomials.

@@ -25,7 +25,7 @@ CppAD::AD<double> polyeval(Eigen::VectorXd coeffs, CppAD::AD<double> x) {
 double polyslope(Eigen::VectorXd coeffs, double x) {
   double result = 0.0;
   for (int i = 1; i < coeffs.size(); i++) {
-    result += i* coeffs[i] * pow(x, i - 1);
+    result += i * coeffs[i] * pow(x, i - 1);
   }
   return result;
 }
@@ -34,7 +34,7 @@ double polyslope(Eigen::VectorXd coeffs, double x) {
 CppAD::AD<double> polyslope(Eigen::VectorXd coeffs, CppAD::AD<double> x) {
   CppAD::AD<double> result = 0.0;
   for (int i = 1; i < coeffs.size(); i++) {
-    result += i* coeffs[i] * CppAD::pow(x, i - 1);
+    result += i * coeffs[i] * CppAD::pow(x, i - 1);
   }
   return result;
 }
@@ -141,4 +141,3 @@ void ProcessData(MPC &mpc, const WayPoints &waypoints, const Vehicle &veh) {
 }
 
 typedef std::vector<std::vector<int>> ImageArray;
-

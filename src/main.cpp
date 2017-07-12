@@ -56,25 +56,16 @@ int main() {
         string event = j[0].get<string>();
         if (event == "telemetry") {
           // j[1] is the data JSON object
-          //          vector<double> ptsx = j[1]["ptsx"];
-          //          vector<double> ptsy = j[1]["ptsy"];
-          //          double px = j[1]["x"];
-          //          double py = j[1]["y"];
-          //          double psi = j[1]["psi"];
-          //          double v = j[1]["speed"];
-
           WayPoints waypoints{j[1]["ptsx"], j[1]["ptsy"]};
-          WayPoints future_path;
-          //          waypoints.x = ;
-          //          waypoints.y = j[1]["ptsxy"];
           Vehicle veh;
           veh.x = j[1]["x"];
           veh.y = j[1]["y"];
           veh.psi = j[1]["psi"];
           veh.v = j[1]["speed"];
+
           ProcessData(mpc, waypoints, veh);
-          veh.steer=mpc.Steer();
-          veh.throttle=mpc.Throttle();
+          veh.steer = mpc.Steer();
+          veh.throttle = mpc.Throttle();
 
           json msgJson;
           msgJson["steering_angle"] = ToSimSteer(veh.steer);
@@ -89,7 +80,7 @@ int main() {
           msgJson["next_y"] = mpc.Reference().y;
 
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
-//          std::cout << msg << std::endl;
+          //          std::cout << msg << std::endl;
           // Latency
           // The purpose is to mimic real driving conditions where
           // the car does actuate the commands instantly.
@@ -99,7 +90,7 @@ int main() {
           //
           // NOTE: REMEMBER TO SET THIS TO 100 MILLISECONDS BEFORE
           // SUBMITTING.
-//          this_thread::sleep_for(chrono::milliseconds(100));
+          //          this_thread::sleep_for(chrono::milliseconds(100));
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
         }
       } else {

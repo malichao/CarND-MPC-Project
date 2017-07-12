@@ -30,7 +30,7 @@ class MPC {
  private:
   double steering_m;
   double throttle_m;
-  WayPoints prediction_m,reference_m;
+  WayPoints prediction_m, reference_m;
 };
 
 #endif /* MPC_H */
