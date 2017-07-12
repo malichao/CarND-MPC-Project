@@ -35,7 +35,39 @@ string hasData(string s) {
   return "";
 }
 
-double ToSimSteer(const double steer) { return -steer / (25.0 / 180.0 * M_PI); }
+double ToSimSteer(const double steer) { return rad2deg(-steer) / 25.0; }
+double ToMPCSteer(const double steer) { return deg2rad(-steer * 25.0); }
+
+/* --- Sample telemetry format from simulator ---
+[
+  "telemetry",
+  {
+    "psi": 3.73521,
+    "psi_unity": 4.118772,
+    "ptsx": [
+      -32.16173,
+      -43.49173,
+      -61.09,
+      -78.29172,
+      -93.05002,
+      -107.7717
+    ],
+    "ptsy": [
+      113.361,
+      105.941,
+      92.88499,
+      78.73102,
+      65.34102,
+      50.57938
+    ],
+    "speed": 8.139975,
+    "steering_angle": -0.001243055,
+    "throttle": 1,
+    "x": -42.01076,
+    "y": 107.7916
+  }
+]
+*/
 
 int main(int argc, char** argv) {
   uWS::Hub h;
@@ -61,6 +93,7 @@ int main(int argc, char** argv) {
       string s = hasData(sdata);
       if (s != "") {
         auto j = json::parse(s);
+        cout << setw(2) << j << endl;
         string event = j[0].get<string>();
         if (event == "telemetry") {
           // j[1] is the data JSON object
@@ -70,6 +103,8 @@ int main(int argc, char** argv) {
           veh.y = j[1]["y"];
           veh.psi = j[1]["psi"];
           veh.v = j[1]["speed"];
+          veh.steer = ToMPCSteer(j[1]["steering_angle"]);
+          veh.throttle = j[1]["throttle"];
 
           ProcessData(mpc, waypoints, veh);
           veh.steer = mpc.Steer();

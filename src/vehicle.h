@@ -4,6 +4,9 @@
 class Vehicle {
  public:
   Vehicle();
+
+  void Drive(const double dt);
+
   double x;
   double y;
   double psi;
