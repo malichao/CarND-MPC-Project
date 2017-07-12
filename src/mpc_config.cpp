@@ -37,20 +37,20 @@ void MPCConfig::ReadConfig(const std::string file) {
   a_start = delta_start + N - 1;
 
   // Weights for the cost function
-  cte_w = j["cte_w"];
-  epsi_w = j["epsi_w"];
-  v_w = j["v_w"];
-  delta_w = j["delta_w"];
-  acc_w = j["acc_w"];
-  delta_dot_w = j["delta_dot_w"];
-  acc_dot_w = j["acc_dot_w"];
+  cte_w = j["w_cte"];
+  epsi_w = j["w_epsi"];
+  v_w = j["w_v"];
+  delta_w = j["w_delta"];
+  acc_w = j["w_acc"];
+  delta_dot_w = j["w_delta_dot"];
+  acc_dot_w = j["w_acc_dot"];
 
-  default_max = j["default_max"];
-  default_min = j["default_min"];
-  delta_max = j["delta_max"];
-  delta_min = j["delta_min"];
-  acc_max = j["acc_max"];
-  acc_min = j["acc_min"];
+  default_max = j["r_default_max"];
+  default_min = j["r_default_min"];
+  delta_max = j["r_delta_max"];
+  delta_min = j["r_delta_min"];
+  acc_max = j["r_acc_max"];
+  acc_min = j["r_acc_min"];
 }
 
 void MPCConfig::WriteConfig(const std::string file) {
@@ -63,20 +63,20 @@ void MPCConfig::WriteConfig(const std::string file) {
   j["ref_v"] = ref_v;  // mph
 
   // Weights for the cost function
-  j["cte_w"] = cte_w;
-  j["epsi_w"] = epsi_w;
-  j["v_w"] = v_w;
-  j["delta_w"] = delta_w;
-  j["acc_w"] = acc_w;
-  j["delta_dot_w"] = delta_dot_w;
-  j["acc_dot_w"] = acc_dot_w;
+  j["w_cte"] = cte_w;
+  j["w_epsi"] = epsi_w;
+  j["w_v"] = v_w;
+  j["w_delta"] = delta_w;
+  j["w_acc"] = acc_w;
+  j["w_delta_dot"] = delta_dot_w;
+  j["w_acc_dot"] = acc_dot_w;
 
-  j["default_max"] = default_max;
-  j["default_min"] = default_min;
-  j["delta_max"] = delta_max;
-  j["delta_min"] = delta_min;
-  j["acc_max"] = acc_max;
-  j["acc_min"] = acc_min;
+  j["r_default_max"] = default_max;
+  j["r_default_min"] = default_min;
+  j["r_delta_max"] = delta_max;
+  j["r_delta_min"] = delta_min;
+  j["r_acc_max"] = acc_max;
+  j["r_acc_min"] = acc_min;
 
   out << std::setw(2) << j << std::endl;
 }

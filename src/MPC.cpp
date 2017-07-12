@@ -168,23 +168,23 @@ vector<double> MPC::Solve(Eigen::VectorXd x0, Eigen::VectorXd coeffs) {
   // Set all non-actuators upper and lowerlimits
   // to the max negative and positive values.
   for (size_t i = 0; i < delta_start; i++) {
-    vars_lowerbound[i] = -1.0e19;
-    vars_upperbound[i] = 1.0e19;
+    vars_lowerbound[i] = config_m->default_min;
+    vars_upperbound[i] = config_m->default_max;
   }
 
   // The upper and lower limits of delta are set to -25 and 25
   // degrees (values in radians).
   // NOTE: Feel free to change this to something else.
   for (size_t i = delta_start; i < a_start; i++) {
-    vars_lowerbound[i] = -0.436332;
-    vars_upperbound[i] = 0.436332;
+    vars_lowerbound[i] = config_m->delta_min;
+    vars_upperbound[i] = config_m->delta_max;
   }
 
   // Acceleration/decceleration upper and lower limits.
   // NOTE: Feel free to change this to something else.
   for (size_t i = a_start; i < n_vars; i++) {
-    vars_lowerbound[i] = -1.0;
-    vars_upperbound[i] = 1.0;
+    vars_lowerbound[i] = config_m->acc_min;
+    vars_upperbound[i] = config_m->acc_max;
   }
 
   // Lower and upper limits for constraints
