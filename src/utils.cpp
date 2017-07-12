@@ -1,4 +1,5 @@
 #include "utils.h"
+#include <chrono>
 #include <cppad/cppad.hpp>
 #include "Eigen-3.3/Eigen/Core"
 #include "Eigen-3.3/Eigen/QR"
@@ -145,7 +146,10 @@ void ProcessData(MPC &mpc, const WayPoints &waypoints, const Vehicle &veh) {
   //  "\n";
 }
 
-typedef std::vector<std::vector<int>> ImageArray;
+double Now() {
+  auto now = std::chrono::system_clock::now().time_since_epoch();
+  return now.count() / 1e9;
+}
 
 double WrapHeading(const double &heading) {
   double x = cos(heading);
@@ -157,4 +161,9 @@ CppAD::AD<double> WrapHeading(const CppAD::AD<double> &heading) {
   CppAD::AD<double> x = CppAD::cos(heading);
   CppAD::AD<double> y = CppAD::sin(heading);
   return CppAD::atan2(y, x);
+}
+
+double Distance(const double &x1, const double &y1, const double &x2,
+                const double &y2) {
+  return sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
 }

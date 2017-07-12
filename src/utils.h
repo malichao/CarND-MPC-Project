@@ -37,6 +37,12 @@ void LocalToGlobal(const double& veh_x, const double& veh_y,
 double WrapHeading(const double& heading);
 CppAD::AD<double> WrapHeading(const CppAD::AD<double>& heading);
 
+// Get current time
+double Now();
+
+double Distance(const double& x1, const double& y1, const double& x2,
+                const double& y2);
+
 void ProcessData(MPC& mpc, const WayPoints& waypoints, const Vehicle& veh);
 // Fit a polynomial.
 // Adapted from

@@ -19,6 +19,8 @@ using namespace std;
 constexpr double pi() { return M_PI; }
 double deg2rad(double x) { return x * pi() / 180; }
 double rad2deg(double x) { return x * 180 / pi(); }
+double mph2ms(double x) { return x * 0.447; }
+double ms2mph(double x) { return x / 0.447; }
 
 // Checks if the SocketIO event has JSON data.
 // If there is data the JSON object in string format will be returned,
@@ -69,6 +71,8 @@ double ToMPCSteer(const double steer) { return deg2rad(-steer * 25.0); }
 ]
 */
 
+double last_x, last_y, last_t = Now();
+double last_v;
 int main(int argc, char** argv) {
   uWS::Hub h;
 
@@ -107,9 +111,17 @@ int main(int argc, char** argv) {
           veh.Psi() = j[1]["psi"];
           veh.Psi() = WrapHeading(veh.Psi());
           veh.V() = j[1]["speed"];
-          veh.Drive(.1);
+          veh.V() = mph2ms(veh.V());
+          //          veh.Drive(.1);
           veh.Steer() = ToMPCSteer(j[1]["steering_angle"]);
           veh.Throttle() = j[1]["throttle"];
+
+          double dist = Distance(veh.X(), veh.Y(), last_x, last_y);
+          double dt = Now() - last_t;
+          double acc = (veh.V() - last_v) / dt;
+          printf("%.2f,%.1f,%.2f\n", dt, veh.Throttle(), acc);
+          last_v = veh.V();
+          last_t = Now();
 
           ProcessData(mpc, waypoints, veh);
           veh.Steer() = mpc.Steer();
@@ -138,7 +150,7 @@ int main(int argc, char** argv) {
           //
           // NOTE: REMEMBER TO SET THIS TO 100 MILLISECONDS BEFORE
           // SUBMITTING.
-          this_thread::sleep_for(chrono::milliseconds(100));
+          //          this_thread::sleep_for(chrono::milliseconds(100));
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
         }
       } else {
