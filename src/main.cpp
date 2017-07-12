@@ -44,7 +44,6 @@ int main() {
   MPC mpc;
 
   MPCConfig mpc_config;
-  mpc_config.WriteConfig("../config/test.cfg");
 
   h.onMessage([&mpc](uWS::WebSocket<uWS::SERVER> ws, char* data, size_t length,
                      uWS::OpCode opCode) {
