@@ -37,12 +37,16 @@ string hasData(string s) {
 
 double ToSimSteer(const double steer) { return -steer / (25.0 / 180.0 * M_PI); }
 
-int main() {
+int main(int argc, char** argv) {
   uWS::Hub h;
 
   // MPC is initialized here!
-  MPCConfig mpc_config;
-  mpc_config.WriteConfig("../config/test.cfg");
+  std::string config_file = "../config/test.cfg";
+  if (argc == 2) {
+    config_file = argv[1];
+  }
+  MPCConfig mpc_config(config_file);
+  //  mpc_config.WriteConfig("../config/test.cfg");
   MPC mpc(mpc_config);
 
   h.onMessage([&mpc](uWS::WebSocket<uWS::SERVER> ws, char* data, size_t length,

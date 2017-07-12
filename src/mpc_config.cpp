@@ -51,6 +51,9 @@ void MPCConfig::ReadConfig(const std::string file) {
   delta_min = j["r_delta_min"];
   acc_max = j["r_acc_max"];
   acc_min = j["r_acc_min"];
+
+  std::cout<<"------ Configuration ------\n";
+  std::cout << std::setw(2) << j<<"\n";
 }
 
 void MPCConfig::WriteConfig(const std::string file) {
