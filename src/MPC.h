@@ -3,13 +3,16 @@
 
 #include <vector>
 #include "Eigen-3.3/Eigen/Core"
+#include "mpc_config.h"
 #include "waypoints.h"
 
 class MPC {
  public:
-  MPC();
+  MPC(const MPCConfig& config);
 
   virtual ~MPC();
+
+  void SetConfig(const MPCConfig& config);
 
   // Solve the model given an initial state and polynomial coefficients.
   // Return the first actuatotions.
@@ -31,6 +34,7 @@ class MPC {
   double steering_m;
   double throttle_m;
   WayPoints prediction_m, reference_m;
+  const MPCConfig* config_m;
 };
 
 #endif /* MPC_H */

@@ -7,62 +7,57 @@
 using CppAD::AD;
 using namespace std;
 
-// number of timesteps to 25
-size_t N = 30;
-double dt = 0.05;
-
-// This is the length from front to CoG that has a similar radius.
-const double Lf = 2.67;
-
-// Both the reference cross track and orientation errors are 0.
-// The reference velocity is set to 40 mph.
-double ref_v = 40;
-
-// The solver takes all the state variables and actuator
-// variables in a singular vector. Thus, we should to establish
-// when one variable starts and another ends to make our lifes easier.
-size_t x_start = 0;
-size_t y_start = x_start + N;
-size_t psi_start = y_start + N;
-size_t v_start = psi_start + N;
-size_t cte_start = v_start + N;
-size_t epsi_start = cte_start + N;
-size_t delta_start = epsi_start + N;
-size_t a_start = delta_start + N - 1;
-
 class FG_eval {
  public:
   Eigen::VectorXd coeffs;
+  const MPCConfig* config_m;
   // Coefficients of the fitted polynomial.
-  FG_eval(Eigen::VectorXd coeffs) { this->coeffs = coeffs; }
+  FG_eval(Eigen::VectorXd coeffs, const MPCConfig& config) {
+    this->coeffs = coeffs;
+    config_m = &config;
+  }
 
   typedef CPPAD_TESTVECTOR(AD<double>) ADvector;
 
   // `fg` is a vector containing the cost and constraints.
   // `vars` is a vector containing the variable values (state & actuators).
-  void operator()(ADvector &fg, const ADvector &vars) {
+  void operator()(ADvector& fg, const ADvector& vars) {
+    const size_t& x_start = config_m->x_start;
+    const size_t& y_start = config_m->y_start;
+    const size_t& psi_start = config_m->psi_start;
+    const size_t& v_start = config_m->v_start;
+    const size_t& cte_start = config_m->cte_start;
+    const size_t& epsi_start = config_m->epsi_start;
+    const size_t& delta_start = config_m->delta_start;
+    const size_t& a_start = config_m->a_start;
+    const size_t& N = config_m->N;
+    const double dt = config_m->dt;
+    const double ref_v = config_m->ref_v;
+    const double Lf = config_m->Lf;
+
     // The cost is stored is the first element of `fg`.
     // Any additions to the cost should be added to `fg[0]`.
     fg[0] = 0;
 
     // The part of the cost based on the reference state.
     for (size_t t = 0; t < N; t++) {
-      fg[0] += CppAD::pow(vars[cte_start + t], 2);
-      fg[0] += CppAD::pow(vars[epsi_start + t], 2);
-      fg[0] += CppAD::pow(vars[v_start + t] - ref_v, 2);
+      fg[0] += config_m->cte_w * CppAD::pow(vars[cte_start + t], 2);
+      fg[0] += config_m->epsi_w * CppAD::pow(vars[epsi_start + t], 2);
+      fg[0] += config_m->v_w * CppAD::pow(vars[v_start + t] - ref_v, 2);
     }
 
     // Minimize the use of actuators.
     for (size_t t = 0; t < N - 1; t++) {
-      fg[0] += 5000 * CppAD::pow(vars[delta_start + t], 2);
-      fg[0] += CppAD::pow(vars[a_start + t], 2);
+      fg[0] += config_m->delta_w * CppAD::pow(vars[delta_start + t], 2);
+      fg[0] += config_m->acc_w * CppAD::pow(vars[a_start + t], 2);
     }
 
     // Minimize the value gap between sequential actuations.
     for (size_t t = 0; t < N - 2; t++) {
-      fg[0] += 5000 *
+      fg[0] += config_m->delta_dot_w *
                CppAD::pow(vars[delta_start + t + 1] - vars[delta_start + t], 2);
-      fg[0] += 100 * CppAD::pow(vars[a_start + t + 1] - vars[a_start + t], 2);
+      fg[0] += config_m->acc_dot_w *
+               CppAD::pow(vars[a_start + t + 1] - vars[a_start + t], 2);
     }
 
     // Setup Constraints
@@ -121,10 +116,22 @@ class FG_eval {
 // MPC class definition
 //
 
-MPC::MPC() {}
+MPC::MPC(const MPCConfig& config) { config_m = &config; }
 MPC::~MPC() {}
 
+void MPC::SetConfig(const MPCConfig& config) { config_m = &config; }
+
 vector<double> MPC::Solve(Eigen::VectorXd x0, Eigen::VectorXd coeffs) {
+  const size_t& x_start = config_m->x_start;
+  const size_t& y_start = config_m->y_start;
+  const size_t& psi_start = config_m->psi_start;
+  const size_t& v_start = config_m->v_start;
+  const size_t& cte_start = config_m->cte_start;
+  const size_t& epsi_start = config_m->epsi_start;
+  const size_t& delta_start = config_m->delta_start;
+  const size_t& a_start = config_m->a_start;
+  const size_t& N = config_m->N;
+
   typedef CPPAD_TESTVECTOR(double) Dvector;
 
   double x = x0[0];
@@ -204,7 +211,7 @@ vector<double> MPC::Solve(Eigen::VectorXd x0, Eigen::VectorXd coeffs) {
   constraints_upperbound[epsi_start] = epsi;
 
   // Object that computes objective and constraints
-  FG_eval fg_eval(coeffs);
+  FG_eval fg_eval(coeffs, *config_m);
 
   // options
   std::string options;
@@ -244,15 +251,15 @@ vector<double> MPC::Solve(Eigen::VectorXd x0, Eigen::VectorXd coeffs) {
           solution.x[delta_start],   solution.x[a_start]};
 }
 
-void MPC::SetReference(const WayPoints &ref) { reference_m = ref; }
+void MPC::SetReference(const WayPoints& ref) { reference_m = ref; }
 
 const double MPC::Steer() { return steering_m; }
 
 const double MPC::Throttle() { return throttle_m; }
 
-const WayPoints &MPC::Prediction() const { return prediction_m; }
+const WayPoints& MPC::Prediction() const { return prediction_m; }
 
-const WayPoints &MPC::Reference() const { return reference_m; }
+const WayPoints& MPC::Reference() const { return reference_m; }
 
 //
 // Helper functions to fit and evaluate polynomials.

@@ -21,7 +21,8 @@ void TestDrawCenterPath(WayPoints& waypoints) {
 
 void TestMPC(WayPoints& waypoints) {
   size_t test_size = waypoints.x.size();
-  MPC mpc;
+  MPCConfig mpc_config;
+  MPC mpc(mpc_config);
   Vehicle veh;
   Eigen::VectorXd ptsx(test_size);
   Eigen::VectorXd ptsy(test_size);
@@ -48,7 +49,7 @@ void TestMPC(WayPoints& waypoints) {
   veh.v = 40;
   std::vector<double> x_vals, y_vals;
   WayPoints future_path;
-  int test_iterations = 1;
+  size_t test_iterations = 1;
   for (size_t i = 0; i < test_iterations; i++) {
     std::cout << "Iteration " << i << "\n";
     ProcessData(mpc, waypoints, veh);

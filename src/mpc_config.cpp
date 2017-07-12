@@ -14,6 +14,8 @@ MPCConfig::MPCConfig() {
   a_start = delta_start + N - 1;
 }
 
+MPCConfig::MPCConfig(const std::string file) { ReadConfig(file); }
+
 void MPCConfig::ReadConfig(const std::string file) {
   std::ifstream in(file);
   json j;

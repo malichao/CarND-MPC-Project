@@ -41,9 +41,9 @@ int main() {
   uWS::Hub h;
 
   // MPC is initialized here!
-  MPC mpc;
-
   MPCConfig mpc_config;
+  mpc_config.WriteConfig("../config/test.cfg");
+  MPC mpc(mpc_config);
 
   h.onMessage([&mpc](uWS::WebSocket<uWS::SERVER> ws, char* data, size_t length,
                      uWS::OpCode opCode) {

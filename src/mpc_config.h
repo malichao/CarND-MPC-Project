@@ -5,6 +5,7 @@
 class MPCConfig {
  public:
   MPCConfig();
+  MPCConfig(const std::string file);
 
   void ReadConfig(const std::string file);
   void WriteConfig(const std::string file);
@@ -28,10 +29,10 @@ class MPCConfig {
   double cte_w = 1.0;
   double epsi_w = 1.0;
   double v_w = 1.0;
-  double delta_w = 1.0;
+  double delta_w = 5000.0;
   double acc_w = 1.0;
-  double delta_dot_w = 500.0;
-  double acc_dot_w = 1.0;
+  double delta_dot_w = 5000.0;
+  double acc_dot_w = 100.0;
 
   double default_max = 1.0e19;
   double default_min = -1.0e19;
