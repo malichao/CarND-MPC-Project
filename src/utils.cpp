@@ -12,11 +12,20 @@ double polyeval(Eigen::VectorXd coeffs, double x) {
   return result;
 }
 
+// Evaluate a polynomial.
+CppAD::AD<double> polyeval(Eigen::VectorXd coeffs, CppAD::AD<double> x) {
+  CppAD::AD<double> result = 0.0;
+  for (int i = 0; i < coeffs.size(); i++) {
+    result += coeffs[i] * CppAD::pow(x, i);
+  }
+  return result;
+}
+
 // Evaluate a polynomial slope.
 double polyslope(Eigen::VectorXd coeffs, double x) {
   double result = 0.0;
   for (int i = 1; i < coeffs.size(); i++) {
-    result += coeffs[i] * pow(x, i - 1);
+    result += i* coeffs[i] * pow(x, i - 1);
   }
   return result;
 }
@@ -25,7 +34,7 @@ double polyslope(Eigen::VectorXd coeffs, double x) {
 CppAD::AD<double> polyslope(Eigen::VectorXd coeffs, CppAD::AD<double> x) {
   CppAD::AD<double> result = 0.0;
   for (int i = 1; i < coeffs.size(); i++) {
-    result += coeffs[i] * CppAD::pow(x, i - 1);
+    result += i* coeffs[i] * CppAD::pow(x, i - 1);
   }
   return result;
 }
@@ -113,9 +122,16 @@ void ProcessData(MPC &mpc, const WayPoints &waypoints, const Vehicle &veh) {
   Eigen::VectorXd state(6);
   GlobalToLocal(veh.x, veh.y, veh.psi, waypoints.x, waypoints.y,
                 waypoints_local.x, waypoints_local.y);
-  mpc.SetReference(waypoints_local);
   waypoints_local.ToEigenVector(ptsx_local, ptsy_local);
   auto coeffs = polyfit(ptsx_local, ptsy_local, 3);
+  WayPoints reference;
+  double step = (ptsx_local[ptsx_local.size() - 1] - ptsx_local[0]) / 10;
+  for (double x = ptsx_local[0], i = 0; i < 20; i++) {
+    reference.x.push_back(x);
+    reference.y.push_back(polyeval(coeffs, x));
+    x += step;
+  }
+  mpc.SetReference(reference);
   double cte = polyeval(coeffs, 0);
   double epsi = 0 - atan(polyslope(coeffs, 0));
   state << 0, 0, 0, veh.v, cte, epsi;

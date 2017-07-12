@@ -8,6 +8,7 @@
 
 // Evaluate a polynomial.
 double polyeval(Eigen::VectorXd coeffs, double x);
+CppAD::AD<double> polyeval(Eigen::VectorXd coeffs, CppAD::AD<double> x);
 
 double polyslope(Eigen::VectorXd coeffs, double x);
 CppAD::AD<double> polyslope(Eigen::VectorXd coeffs, CppAD::AD<double> x);

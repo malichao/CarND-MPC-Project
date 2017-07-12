@@ -26,16 +26,25 @@ void TestMPC(WayPoints& waypoints) {
   Eigen::VectorXd ptsx(test_size);
   Eigen::VectorXd ptsy(test_size);
   waypoints.ToEigenVector(ptsx, ptsy);
-  auto coeffs = polyfit(ptsx, ptsy, 3);
-  double steer_offset = polyslope(coeffs,veh.x);
   veh.x = ptsx[0];
   veh.y = ptsy[0];
-  veh.psi = polyslope(coeffs,veh.x);
-//  veh.psi=atan2(waypoints.y[1]-waypoints.y[0],waypoints.x[1]-waypoints.x[0]);
-  veh.v = 10;
+//  veh.psi = -atan(polyslope(coeffs,veh.x));
+//  veh.psi = atan2(polyeval(coeffs,waypoints.x[1])-polyeval(coeffs,waypoints.x[0]),
+//          waypoints.x[1]-waypoints.x[0]);
+//  double x0 = waypoints.x[0];
+//  veh.psi = tan(coeffs[1]);
+  veh.psi=atan2(waypoints.y[1]-waypoints.y[0],waypoints.x[1]-waypoints.x[0]);
+
+//  auto coeffs = polyfit(ptsx, ptsy, 3);
+//  printf("coef:[%.3f,%.3f,%.3f,%.3f]\n",coeffs[0],coeffs[1],coeffs[2],coeffs[3]);
+//  printf("heading: %.2f\n",atan(polyslope(coeffs,veh.x)));
+//  printf("heading: %.2f\n",atan2(waypoints.y[1]-waypoints.y[0],waypoints.x[1]-waypoints.x[0]));
+//  printf("heading: %.2f\n",atan2(polyeval(coeffs,waypoints.x[1])-polyeval(coeffs,waypoints.x[0]),
+//                                 waypoints.x[1]-waypoints.x[0]));
+  veh.v = 40;
   std::vector<double> x_vals, y_vals;
   WayPoints future_path;
-  int test_iterations = 50;
+  int test_iterations = 1;
   for (size_t i = 0; i < test_iterations; i++) {
     std::cout << "Iteration " << i << "\n";
     ProcessData(mpc, waypoints,veh);
@@ -48,33 +57,17 @@ void TestMPC(WayPoints& waypoints) {
     veh.x = future_path.x[1];
     veh.y = future_path.y[1];
     veh.psi +=mpc.Prediction().psi[1];
-//    std::cout << "x = " << veh.x << "\n"
-//              << "y = " << veh.y << "\n"
-//              << "v = " << veh.v << "\n"
-//              << "psi = " << veh.psi << "\n"
-//              << "steer = " << veh.steer << "\n"
-//              << "throttle = " << veh.throttle << "\n";
-  }
-
-  std::vector<double> orig_x(waypoints.x.begin(),
-                             waypoints.x.begin() + test_size);
-  std::vector<double> orig_y(waypoints.y.begin(),
-                             waypoints.y.begin() + test_size);
-
-  std::vector<double> poly_x;
-  std::vector<double> poly_y;
-  double step = (ptsx[ptsx.size() - 1] - ptsx[0]) / 20;
-  for (double x = ptsx[0], i = 0; i < 20; i++) {
-    poly_x.push_back(x);
-    poly_y.push_back(polyeval(coeffs, x));
-    x += step;
+    std::cout << "x = " << veh.x << "\n"
+              << "y = " << veh.y << "\n"
+              << "v = " << veh.v << "\n"
+              << "psi = " << veh.psi << "\n"
+              << "steer = " << veh.steer << "\n"
+              << "throttle = " << veh.throttle << "\n";
   }
 
 //  plt::plot(orig_x, orig_y, "r--");
-//  plt::plot(mpc.Reference().x, mpc.Reference().y, "r");
-//  plt::plot(mpc.Prediction().x, mpc.Prediction().y, "b");
-  plt::plot(poly_x, poly_y, "r");
-  plt::plot(x_vals, y_vals, "b");
+  plt::plot(mpc.Reference().x, mpc.Reference().y, "r--");
+  plt::plot(mpc.Prediction().x, mpc.Prediction().y, "b");
   plt::grid(true);
 }
 
@@ -82,7 +75,7 @@ int main() {
   // ...
   WayPoints waypoints;
   TestDrawCenterPath(waypoints);
-  size_t test_offset =0;
+  size_t test_offset =60;
   size_t test_size = 6;
   WayPoints test_waypoints;
   test_waypoints.x=std::vector<double>(&waypoints.x[test_offset],
