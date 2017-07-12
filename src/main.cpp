@@ -8,6 +8,7 @@
 #include "Eigen-3.3/Eigen/QR"
 #include "MPC.h"
 #include "json.hpp"
+#include "mpc_config.h"
 #include "utils.h"
 
 // for convenience
@@ -42,9 +43,13 @@ int main() {
   // MPC is initialized here!
   MPC mpc;
 
+  MPCConfig mpc_config;
+  mpc_config.WriteConfig("../config/test.cfg");
+
   h.onMessage([&mpc](uWS::WebSocket<uWS::SERVER> ws, char* data, size_t length,
                      uWS::OpCode opCode) {
-    // "42" at the start of the message means there's a websocket message event.
+    // "42" at the start of the message means there's a websocket message
+    // event.
     // The 4 signifies a websocket message
     // The 2 signifies a websocket event
     string sdata = string(data).substr(0, length);
