@@ -88,7 +88,7 @@ void GlobalToLocal(const double &veh_x, const double &veh_y,
   out_y.resize(in_x.size());
   assert(in_x.size() == in_y.size() && in_x.size() == out_x.size() &&
          out_x.size() == out_y.size());
-  for (int i = 0; i < in_x.size(); i++) {
+  for (size_t i = 0; i < in_x.size(); i++) {
     GlobalToLocal(veh_x, veh_y, veh_psi, in_x[i], in_y[i], out_x[i], out_y[i]);
   }
 }
@@ -110,7 +110,7 @@ void LocalToGlobal(const double &veh_x, const double &veh_y,
   out_y.resize(in_x.size());
   assert(in_x.size() == in_y.size() && in_x.size() == out_x.size() &&
          out_x.size() == out_y.size());
-  for (int i = 0; i < in_x.size(); i++) {
+  for (size_t i = 0; i < in_x.size(); i++) {
     LocalToGlobal(veh_x, veh_y, veh_psi, in_x[i], in_y[i], out_x[i], out_y[i]);
   }
 }
