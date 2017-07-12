@@ -81,6 +81,9 @@ int main(int argc, char** argv) {
   //  mpc_config.WriteConfig("../config/test.cfg");
   MPC mpc(mpc_config);
 
+  Vehicle veh1;
+  std::cout << "size = " << sizeof(veh1) << "\n";
+
   h.onMessage([&mpc](uWS::WebSocket<uWS::SERVER> ws, char* data, size_t length,
                      uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message
@@ -93,26 +96,28 @@ int main(int argc, char** argv) {
       string s = hasData(sdata);
       if (s != "") {
         auto j = json::parse(s);
-        cout << setw(2) << j << endl;
+        //        cout << setw(2) << j << endl;
         string event = j[0].get<string>();
         if (event == "telemetry") {
           // j[1] is the data JSON object
+          double t1 = j[1]["psi"], t2 = j[1]["psi_unity"];
+          printf("psi,psi_u [%.2f,%.2f]\n", t1, t2);
           WayPoints waypoints{j[1]["ptsx"], j[1]["ptsy"]};
           Vehicle veh;
-          veh.x = j[1]["x"];
-          veh.y = j[1]["y"];
-          veh.psi = j[1]["psi"];
-          veh.v = j[1]["speed"];
-          veh.steer = ToMPCSteer(j[1]["steering_angle"]);
-          veh.throttle = j[1]["throttle"];
+          veh.X() = j[1]["x"];
+          veh.Y() = j[1]["y"];
+          veh.Psi() = j[1]["psi"];
+          veh.V() = j[1]["speed"];
+          veh.Steer() = ToMPCSteer(j[1]["steering_angle"]);
+          veh.Throttle() = j[1]["throttle"];
 
           ProcessData(mpc, waypoints, veh);
-          veh.steer = mpc.Steer();
-          veh.throttle = mpc.Throttle();
+          veh.Steer() = mpc.Steer();
+          veh.Throttle() = mpc.Throttle();
 
           json msgJson;
-          msgJson["steering_angle"] = ToSimSteer(veh.steer);
-          msgJson["throttle"] = veh.throttle;
+          msgJson["steering_angle"] = ToSimSteer(veh.Steer());
+          msgJson["throttle"] = veh.Throttle();
 
           // Display the MPC predicted trajectory
           msgJson["mpc_x"] = mpc.Prediction().x;

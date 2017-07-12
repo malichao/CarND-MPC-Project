@@ -27,47 +27,47 @@ void TestMPC(WayPoints& waypoints) {
   Eigen::VectorXd ptsx(test_size);
   Eigen::VectorXd ptsy(test_size);
   waypoints.ToEigenVector(ptsx, ptsy);
-  veh.x = ptsx[0];
-  veh.y = ptsy[0];
-  //  veh.psi = -atan(polyslope(coeffs,veh.x));
-  //  veh.psi =
+  veh.X() = ptsx[0];
+  veh.Y() = ptsy[0];
+  //  veh.Psi() = -atan(polyslope(coeffs,veh.X()));
+  //  veh.Psi() =
   //  atan2(polyeval(coeffs,waypoints.x[1])-polyeval(coeffs,waypoints.x[0]),
   //          waypoints.x[1]-waypoints.x[0]);
   //  double x0 = waypoints.x[0];
-  //  veh.psi = tan(coeffs[1]);
-  veh.psi =
+  //  veh.Psi() = tan(coeffs[1]);
+  veh.Psi() =
       atan2(waypoints.y[1] - waypoints.y[0], waypoints.x[1] - waypoints.x[0]);
 
   //  auto coeffs = polyfit(ptsx, ptsy, 3);
   //  printf("coef:[%.3f,%.3f,%.3f,%.3f]\n",coeffs[0],coeffs[1],coeffs[2],coeffs[3]);
-  //  printf("heading: %.2f\n",atan(polyslope(coeffs,veh.x)));
+  //  printf("heading: %.2f\n",atan(polyslope(coeffs,veh.X())));
   //  printf("heading:
   //  %.2f\n",atan2(waypoints.y[1]-waypoints.y[0],waypoints.x[1]-waypoints.x[0]));
   //  printf("heading:
   //  %.2f\n",atan2(polyeval(coeffs,waypoints.x[1])-polyeval(coeffs,waypoints.x[0]),
   //                                 waypoints.x[1]-waypoints.x[0]));
-  veh.v = 40;
+  veh.V() = 40;
   std::vector<double> x_vals, y_vals;
   WayPoints future_path;
   size_t test_iterations = 1;
   for (size_t i = 0; i < test_iterations; i++) {
     std::cout << "Iteration " << i << "\n";
     ProcessData(mpc, waypoints, veh);
-    x_vals.push_back(veh.x);
-    y_vals.push_back(veh.y);
-    LocalToGlobal(veh.x, veh.y, veh.psi, mpc.Prediction().x, mpc.Prediction().y,
-                  future_path.x, future_path.y);
-    veh.steer = mpc.Steer();
-    veh.throttle = mpc.Throttle();
-    veh.x = future_path.x[1];
-    veh.y = future_path.y[1];
-    veh.psi += mpc.Prediction().psi[1];
-    std::cout << "x = " << veh.x << "\n"
-              << "y = " << veh.y << "\n"
-              << "v = " << veh.v << "\n"
-              << "psi = " << veh.psi << "\n"
-              << "steer = " << veh.steer << "\n"
-              << "throttle = " << veh.throttle << "\n";
+    x_vals.push_back(veh.X());
+    y_vals.push_back(veh.Y());
+    LocalToGlobal(veh.X(), veh.Y(), veh.Psi(), mpc.Prediction().x,
+                  mpc.Prediction().y, future_path.x, future_path.y);
+    veh.Steer() = mpc.Steer();
+    veh.Throttle() = mpc.Throttle();
+    veh.X() = future_path.x[1];
+    veh.Y() = future_path.y[1];
+    veh.Psi() += mpc.Prediction().psi[1];
+    std::cout << "x = " << veh.X() << "\n"
+              << "y = " << veh.Y() << "\n"
+              << "v = " << veh.V() << "\n"
+              << "psi = " << veh.Psi() << "\n"
+              << "steer = " << veh.Steer() << "\n"
+              << "throttle = " << veh.Throttle() << "\n";
   }
 
   //  plt::plot(orig_x, orig_y, "r--");

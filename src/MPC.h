@@ -4,6 +4,7 @@
 #include <vector>
 #include "Eigen-3.3/Eigen/Core"
 #include "mpc_config.h"
+#include "vehicle.h"
 #include "waypoints.h"
 
 class MPC {
@@ -16,7 +17,7 @@ class MPC {
 
   // Solve the model given an initial state and polynomial coefficients.
   // Return the first actuatotions.
-  std::vector<double> Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs);
+  std::vector<double> Solve(const Vehicle& veh, Eigen::VectorXd coeffs);
 
   void SetReference(const WayPoints& ref);
 

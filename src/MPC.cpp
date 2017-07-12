@@ -121,7 +121,7 @@ MPC::~MPC() {}
 
 void MPC::SetConfig(const MPCConfig& config) { config_m = &config; }
 
-vector<double> MPC::Solve(Eigen::VectorXd x0, Eigen::VectorXd coeffs) {
+vector<double> MPC::Solve(const Vehicle& veh, Eigen::VectorXd coeffs) {
   const size_t& x_start = config_m->x_start;
   const size_t& y_start = config_m->y_start;
   const size_t& psi_start = config_m->psi_start;
@@ -134,12 +134,14 @@ vector<double> MPC::Solve(Eigen::VectorXd x0, Eigen::VectorXd coeffs) {
 
   typedef CPPAD_TESTVECTOR(double) Dvector;
 
-  double x = x0[0];
-  double y = x0[1];
-  double psi = x0[2];
-  double v = x0[3];
-  double cte = x0[4];
-  double epsi = x0[5];
+  const double& x = veh.X();
+  const double& y = veh.Y();
+  const double& psi = veh.Psi();
+  const double& v = veh.V();
+  const double& cte = veh.Cte();
+  const double& epsi = veh.Epsi();
+  const double& delta = veh.Steer();
+  const double& acc = veh.Throttle();
 
   // number of independent variables
   // N timesteps == N - 1 actuations
@@ -160,6 +162,8 @@ vector<double> MPC::Solve(Eigen::VectorXd x0, Eigen::VectorXd coeffs) {
   vars[v_start] = v;
   vars[cte_start] = cte;
   vars[epsi_start] = epsi;
+  vars[delta_start] = delta;
+  vars[a_start] = acc;
 
   // Lower and upper limits for x
   Dvector vars_lowerbound(n_vars);
@@ -233,6 +237,7 @@ vector<double> MPC::Solve(Eigen::VectorXd x0, Eigen::VectorXd coeffs) {
   bool ok = true;
   ok &= solution.status == CppAD::ipopt::solve_result<Dvector>::success;
 
+  if (!ok) std::cout << "Solution not found\n";
   //  auto cost = solution.obj_value;
   //  std::cout << "Cost " << cost << std::endl;
   steering_m = solution.x[delta_start];

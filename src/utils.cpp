@@ -120,7 +120,7 @@ void ProcessData(MPC &mpc, const WayPoints &waypoints, const Vehicle &veh) {
   Eigen::VectorXd ptsx_local(waypoints.x.size());
   Eigen::VectorXd ptsy_local(waypoints.x.size());
   Eigen::VectorXd state(6);
-  GlobalToLocal(veh.x, veh.y, veh.psi, waypoints.x, waypoints.y,
+  GlobalToLocal(veh.X(), veh.Y(), veh.Psi(), waypoints.x, waypoints.y,
                 waypoints_local.x, waypoints_local.y);
   waypoints_local.ToEigenVector(ptsx_local, ptsy_local);
   auto coeffs = polyfit(ptsx_local, ptsy_local, 3);
@@ -132,10 +132,15 @@ void ProcessData(MPC &mpc, const WayPoints &waypoints, const Vehicle &veh) {
     x += step;
   }
   mpc.SetReference(reference);
-  double cte = polyeval(coeffs, 0);
-  double epsi = 0 - atan(polyslope(coeffs, 0));
-  state << 0, 0, 0, veh.v, cte, epsi;
-  mpc.Solve(state, coeffs);
+  Vehicle veh_local(veh);
+  veh_local.X() = 0;
+  veh_local.Y() = 0;
+  veh_local.Psi() = 0;
+  veh_local.Cte() = polyeval(coeffs, 0);
+  veh_local.Epsi() = 0 - atan(polyslope(coeffs, 0));
+  //  state << 0, 0, 0, veh.v, cte, epsi;
+  mpc.Solve(veh_local, coeffs);
+
   //  std::cout << "Steer, throttle = " << veh.steer << "," << veh.throttle <<
   //  "\n";
 }
