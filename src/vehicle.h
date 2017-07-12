@@ -4,6 +4,7 @@
 class Vehicle {
  public:
   Vehicle();
+  Vehicle(const double lf);
 
   void Drive(const double dt);
   double& X();
@@ -26,6 +27,7 @@ class Vehicle {
 
 private:
   Eigen::VectorXd state_m;
+  double Lf_m;  //Wheelbase
 };
 
 #endif  // VEHICLE_H
