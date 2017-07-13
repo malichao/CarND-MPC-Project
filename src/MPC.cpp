@@ -246,8 +246,7 @@ vector<double> MPC::Solve(const Vehicle& veh, Eigen::VectorXd coeffs) {
   bool ok = true;
   ok &= solution.status == CppAD::ipopt::solve_result<Dvector>::success;
 
-  //  auto cost = solution.obj_value;
-  //  std::cout << "Cost " << cost << std::endl;
+  cost_m = solution.obj_value;
   steering_m = solution.x[delta_start];
   acc_m = solution.x[a_start];
   prediction_m.x.resize(N);
@@ -269,6 +268,8 @@ void MPC::SetReference(const WayPoints& ref) { reference_m = ref; }
 const double MPC::Steer() { return steering_m; }
 
 const double MPC::Acc() { return acc_m; }
+
+const double MPC::Cost() { return cost_m; }
 
 const WayPoints& MPC::Prediction() const { return prediction_m; }
 

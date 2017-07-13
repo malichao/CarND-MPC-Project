@@ -9,6 +9,7 @@
 #include "MPC.h"
 #include "json.hpp"
 #include "mpc_config.h"
+#include "path_smoother.h"
 #include "utils.h"
 
 // for convenience
@@ -78,8 +79,11 @@ int main(int argc, char** argv) {
   //  mpc_config.WriteConfig("../config/test.cfg");
   MPC mpc(mpc_config);
 
-  h.onMessage([&mpc, &mpc_config](uWS::WebSocket<uWS::SERVER> ws, char* data,
-                                  size_t length, uWS::OpCode opCode) {
+  bool disable_vis = false;
+
+  h.onMessage([&mpc, &mpc_config, &disable_vis](uWS::WebSocket<uWS::SERVER> ws,
+                                                char* data, size_t length,
+                                                uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message
     // event.
     // The 4 signifies a websocket message
@@ -98,6 +102,8 @@ int main(int argc, char** argv) {
           //          j[1]["psi_unity"];
           //          printf("psi,psi_u [%.2f,%.2f]\n", t1, t2);
           WayPoints waypoints{j[1]["ptsx"], j[1]["ptsy"]};
+          //          PathSmoother smoother;
+          //          smoother.smooth(waypoints, waypoints);
 
           double psi = j[1]["psi"];
           psi = WrapHeading(psi);
@@ -126,29 +132,41 @@ int main(int argc, char** argv) {
           throttle = mpc.Acc();
 
           json msgJson;
+          // Just want to see how it looks like in the second lapse.
+          if (ms2mph(veh.V()) > 98) {
+            disable_vis = true;
+          }
           msgJson["steering_angle"] = ToSimSteer(veh.Steer());
           msgJson["throttle"] = throttle;
-          printf("A%.2f T%.1f\n", mpc.Acc(), throttle);
+          //          printf("A%.2f T%.1f\n", mpc.Acc(), throttle);
 
-          // Display the MPC predicted trajectory
-          msgJson["mpc_x"] = mpc.Prediction().x;
-          msgJson["mpc_y"] = mpc.Prediction().y;
+          printf("Cost %.1f V %.1f Steer %.1f\n", mpc.Cost(), ms2mph(veh.V()),
+                 rad2deg(veh.Steer()));
 
-          // Display the waypoints/reference line
-          msgJson["next_x"] = mpc.Reference().x;
-          msgJson["next_y"] = mpc.Reference().y;
+          if (!disable_vis) {
+            // Display the MPC predicted trajectory
+            msgJson["mpc_x"] = mpc.Prediction().x;
+            msgJson["mpc_y"] = mpc.Prediction().y;
+
+            // Display the waypoints/reference line
+            msgJson["next_x"] = mpc.Reference().x;
+            msgJson["next_y"] = mpc.Reference().y;
+          } else {
+            std::vector<double> empty;
+            // Display the MPC predicted trajectory
+            msgJson["mpc_x"] = empty;
+            msgJson["mpc_y"] = empty;
+
+            // Display the waypoints/reference line
+            msgJson["next_x"] = empty;
+            msgJson["next_y"] = empty;
+          }
 
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
           //          std::cout << msg << std::endl;
           // Latency
           // The purpose is to mimic real driving conditions where
           // the car does actuate the commands instantly.
-          //
-          // Feel free to play around with this value but should be to drive
-          // around the track with 100ms latency.
-          //
-          // NOTE: REMEMBER TO SET THIS TO 100 MILLISECONDS BEFORE
-          // SUBMITTING.
           this_thread::sleep_for(chrono::milliseconds(100));
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
         }

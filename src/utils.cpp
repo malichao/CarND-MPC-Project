@@ -158,13 +158,14 @@ void ProcessData(MPC &mpc, const WayPoints &waypoints, const Vehicle &veh,
                             reference.x[i] - reference.x[i - 1]));
   }
   deviation /= reference.x.size();
-  deviation = std::max(std::min(deviation, .6), .1);
+  const double dev_max = 0.6, dev_min = 0.1;
+  deviation = std::max(std::min(deviation, dev_max), dev_min);
   double v_max = config.vx_max, v_min = config.vx_min;
-  double slope = (v_max - v_min) / 0.5;
+  double slope = (v_max - v_min) / (dev_max - dev_min);
   double v_ref = v_max - deviation * slope;
   v_ref = std::max(std::min(v_ref, v_max), v_min);
   config.ref_v = mph2ms(v_ref);
-  printf("D %.3f V %.1f ", deviation, v_ref);
+  //  printf("D %.3f V %.1f ", deviation, v_ref);
 
   //  double p1_x = 0;
   //  double p1_y = polyeval(coeffs, p1_x);
