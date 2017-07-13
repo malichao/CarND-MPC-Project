@@ -71,8 +71,8 @@ double ToMPCSteer(const double steer) { return deg2rad(-steer * 25.0); }
 ]
 */
 
-double last_x, last_y, last_t = Now();
-double last_v;
+double last_t = Now();
+Vehicle veh;
 int main(int argc, char** argv) {
   uWS::Hub h;
 
@@ -105,22 +105,23 @@ int main(int argc, char** argv) {
           //          j[1]["psi_unity"];
           //          printf("psi,psi_u [%.2f,%.2f]\n", t1, t2);
           WayPoints waypoints{j[1]["ptsx"], j[1]["ptsy"]};
-          Vehicle veh;
-          veh.X() = j[1]["x"];
-          veh.Y() = j[1]["y"];
-          veh.Psi() = j[1]["psi"];
-          veh.Psi() = WrapHeading(veh.Psi());
-          veh.V() = j[1]["speed"];
-          veh.V() = mph2ms(veh.V());
-          veh.Steer() = ToMPCSteer(j[1]["steering_angle"]);
 
+          double psi = j[1]["psi"];
+          psi = WrapHeading(psi);
+
+          double v = mph2ms(j[1]["speed"]);
           double dt = Now() - last_t;
-          double acc = (veh.V() - last_v) / dt;
-          last_v = veh.V();
+          double acc = (v - veh.V()) / dt;
           last_t = Now();
 
+          veh.X() = j[1]["x"];
+          veh.Y() = j[1]["y"];
+          veh.V() = v;
+          veh.Psi() = psi;
           veh.Acc() = acc;
+          veh.Steer() = ToMPCSteer(j[1]["steering_angle"]);
           veh.Drive(dt);
+
           ProcessData(mpc, waypoints, veh);
           veh.Steer() = mpc.Steer();
           veh.Acc() = mpc.Acc();
@@ -129,8 +130,6 @@ int main(int argc, char** argv) {
             throttle += 0.1;
           else if (mpc.Acc() < -0.2)
             throttle -= 0.1;
-
-          printf("%.2f,%.1f,%.2f\n", dt, throttle, acc);
 
           json msgJson;
           msgJson["steering_angle"] = ToSimSteer(veh.Steer());
