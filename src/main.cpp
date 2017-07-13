@@ -31,7 +31,7 @@ string hasData(string s) {
 }
 
 double ToSimSteer(const double steer) { return rad2deg(-steer) / 25.0; }
-double ToMPCSteer(const double steer) { return deg2rad(-steer * 25.0); }
+double ToMPCSteer(const double steer) { return -steer; }
 
 /* --- Sample telemetry format from simulator ---
 [
