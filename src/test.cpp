@@ -59,7 +59,7 @@ void TestMPC(WayPoints& waypoints) {
   size_t test_iterations = 1;
   for (size_t i = 0; i < test_iterations; i++) {
     std::cout << "Iteration " << i << "\n";
-    ProcessData(mpc, waypoints, veh);
+    ProcessData(mpc, waypoints, veh, mpc_config);
     x_vals.push_back(veh.X());
     y_vals.push_back(veh.Y());
     LocalToGlobal(veh.X(), veh.Y(), veh.Psi(), mpc.Prediction().x,

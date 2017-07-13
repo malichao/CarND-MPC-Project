@@ -6,6 +6,12 @@
 #include "vehicle.h"
 #include "waypoints.h"
 
+constexpr double pi();
+double deg2rad(double x);
+double rad2deg(double x);
+double mph2ms(double x);
+double ms2mph(double x);
+
 // Evaluate a polynomial.
 double polyeval(Eigen::VectorXd coeffs, double x);
 CppAD::AD<double> polyeval(Eigen::VectorXd coeffs, CppAD::AD<double> x);
@@ -43,7 +49,14 @@ double Now();
 double Distance(const double& x1, const double& y1, const double& x2,
                 const double& y2);
 
-void ProcessData(MPC& mpc, const WayPoints& waypoints, const Vehicle& veh);
+double Area(const double& a_x, const double& a_y, const double& b_x,
+            const double& b_y, const double& c_x, const double& c_y);
+
+double Curvature(const double& a_x, const double& a_y, const double& b_x,
+                 const double& b_y, const double& c_x, const double& c_y);
+
+void ProcessData(MPC& mpc, const WayPoints& waypoints, const Vehicle& veh,
+                 MPCConfig& config);
 // Fit a polynomial.
 // Adapted from
 // https://github.com/JuliaMath/Polynomials.jl/blob/master/src/Polynomials.jl#L676-L716

@@ -4,6 +4,13 @@
 #include "Eigen-3.3/Eigen/Core"
 #include "Eigen-3.3/Eigen/QR"
 
+// For converting back and forth between radians and degrees.
+constexpr double pi() { return M_PI; }
+double deg2rad(double x) { return x * pi() / 180; }
+double rad2deg(double x) { return x * 180 / pi(); }
+double mph2ms(double x) { return x * 0.447; }
+double ms2mph(double x) { return x / 0.447; }
+
 // Evaluate a polynomial.
 double polyeval(Eigen::VectorXd coeffs, double x) {
   double result = 0.0;
@@ -116,7 +123,8 @@ void LocalToGlobal(const double &veh_x, const double &veh_y,
   }
 }
 
-void ProcessData(MPC &mpc, const WayPoints &waypoints, const Vehicle &veh) {
+void ProcessData(MPC &mpc, const WayPoints &waypoints, const Vehicle &veh,
+                 MPCConfig &config) {
   WayPoints waypoints_local;
   Eigen::VectorXd ptsx_local(waypoints.x.size());
   Eigen::VectorXd ptsy_local(waypoints.x.size());
@@ -133,6 +141,32 @@ void ProcessData(MPC &mpc, const WayPoints &waypoints, const Vehicle &veh) {
     x += step;
   }
   mpc.SetReference(reference);
+
+  double deviation = 0;
+  for (int i = 1; i < reference.x.size(); i++) {
+    deviation += fabs(atan2(reference.y[i] - reference.y[i - 1],
+                            reference.x[i] - reference.x[i - 1]));
+  }
+  deviation = std::max(std::min(deviation, 12.0), 4.0);
+  double v_max = (deviation - 4) * (-3.25) + 53;
+  v_max = std::max(std::min(v_max, 53.0), 26.0);
+  config.ref_v = v_max;
+  printf("D%.3f V%.3f ", deviation, ms2mph(v_max));
+
+  //  double p1_x = 0;
+  //  double p1_y = polyeval(coeffs, p1_x);
+  //  double p2_x = 20;
+  //  double p2_y = polyeval(coeffs, p2_x);
+  //  double p3_x = 40;
+  //  double p3_y = polyeval(coeffs, p2_x);
+  //  double curv = Curvature(p1_x, p1_y, p2_x, p2_y, p3_x, p3_y);
+  //  double radius = 1 / fabs(curv);
+  //  double acc_y_max = 5;
+  //  double v_max = sqrt(acc_y_max / fabs(curv));
+  //  v_max = std::max(std::min(v_max, 67.0), 29.0);
+  //  config.ref_v = v_max;
+  //  printf("C%.3f R %.1f V%.1f\n", curv, radius, ms2mph(v_max));
+
   Vehicle veh_local(veh);
   veh_local.X() = 0;
   veh_local.Y() = 0;
@@ -166,4 +200,20 @@ CppAD::AD<double> WrapHeading(const CppAD::AD<double> &heading) {
 double Distance(const double &x1, const double &y1, const double &x2,
                 const double &y2) {
   return sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+}
+
+double Area(const double &a_x, const double &a_y, const double &b_x,
+            const double &b_y, const double &c_x, const double &c_y) {
+  double area = (b_x - a_x) * (c_y - a_y) - (b_y - a_y) * (c_x - a_x);
+  return area;
+}
+
+double Curvature(const double &a_x, const double &a_y, const double &b_x,
+                 const double &b_y, const double &c_x, const double &c_y) {
+  double dist1 = Distance(a_x, a_y, b_x, b_y);
+  double dist2 = Distance(b_x, b_y, c_x, c_y);
+  double dist3 = Distance(c_x, c_y, a_x, a_y);
+  double curv =
+      4 * Area(a_x, a_y, b_x, b_y, c_x, c_y) / (dist1 * dist2 * dist3);
+  return curv;
 }

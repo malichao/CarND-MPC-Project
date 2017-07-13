@@ -15,13 +15,6 @@
 using json = nlohmann::json;
 using namespace std;
 
-// For converting back and forth between radians and degrees.
-constexpr double pi() { return M_PI; }
-double deg2rad(double x) { return x * pi() / 180; }
-double rad2deg(double x) { return x * 180 / pi(); }
-double mph2ms(double x) { return x * 0.447; }
-double ms2mph(double x) { return x / 0.447; }
-
 // Checks if the SocketIO event has JSON data.
 // If there is data the JSON object in string format will be returned,
 // else the empty string "" will be returned.
@@ -85,8 +78,8 @@ int main(int argc, char** argv) {
   //  mpc_config.WriteConfig("../config/test.cfg");
   MPC mpc(mpc_config);
 
-  h.onMessage([&mpc](uWS::WebSocket<uWS::SERVER> ws, char* data, size_t length,
-                     uWS::OpCode opCode) {
+  h.onMessage([&mpc, &mpc_config](uWS::WebSocket<uWS::SERVER> ws, char* data,
+                                  size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message
     // event.
     // The 4 signifies a websocket message
@@ -122,18 +115,20 @@ int main(int argc, char** argv) {
           veh.Steer() = ToMPCSteer(j[1]["steering_angle"]);
           veh.Drive(dt);
 
-          ProcessData(mpc, waypoints, veh);
+          ProcessData(mpc, waypoints, veh, mpc_config);
           veh.Steer() = mpc.Steer();
           veh.Acc() = mpc.Acc();
           double throttle = j[1]["throttle"];
-          if (mpc.Acc() > 0.2)
-            throttle += 0.1;
-          else if (mpc.Acc() < -0.2)
-            throttle -= 0.1;
+          //          if (mpc.Acc() > 0.2)
+          //            throttle += 0.1;
+          //          else if (mpc.Acc() < -0.2)
+          //            throttle -= 0.1;
+          throttle = mpc.Acc();
 
           json msgJson;
           msgJson["steering_angle"] = ToSimSteer(veh.Steer());
           msgJson["throttle"] = throttle;
+          printf("A%.2f T%.1f\n", mpc.Acc(), throttle);
 
           // Display the MPC predicted trajectory
           msgJson["mpc_x"] = mpc.Prediction().x;
