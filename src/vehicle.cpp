@@ -7,7 +7,7 @@ void Vehicle::Drive(const double dt) {
     X() = X() +V()* cos(Psi()) * dt;
     Y() = Y() +V()* sin(Psi()) * dt;
     Psi() = Psi() +V()/ Lf_m * Steer() * dt;
-    V() = V()+ Throttle() * dt;
+    V() = V()+ Acc() * dt;
 }
 
 double &Vehicle::X() { return state_m[0]; }
@@ -20,7 +20,7 @@ double &Vehicle::V() { return state_m[3]; }
 
 double &Vehicle::Steer() { return state_m[4]; }
 
-double &Vehicle::Throttle() { return state_m[5]; }
+double &Vehicle::Acc() { return state_m[5]; }
 
 double &Vehicle::Cte() { return state_m[6]; }
 
@@ -36,7 +36,7 @@ const double &Vehicle::V() const { return state_m[3]; }
 
 const double &Vehicle::Steer() const { return state_m[4]; }
 
-const double &Vehicle::Throttle() const { return state_m[5]; }
+const double &Vehicle::Acc() const { return state_m[5]; }
 
 const double &Vehicle::Cte() const { return state_m[6]; }
 

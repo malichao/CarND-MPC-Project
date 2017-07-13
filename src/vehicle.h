@@ -12,7 +12,7 @@ class Vehicle {
   double& Psi();
   double& V();
   double& Steer();
-  double& Throttle();
+  double& Acc();
   double& Cte();
   double& Epsi();
 
@@ -21,7 +21,7 @@ class Vehicle {
   const double& Psi()const ;
   const double& V()const ;
   const double& Steer()const ;
-  const double& Throttle()const ;
+  const double& Acc()const ;
   const double& Cte()const ;
   const double& Epsi()const ;
 

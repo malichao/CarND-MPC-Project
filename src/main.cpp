@@ -112,24 +112,29 @@ int main(int argc, char** argv) {
           veh.Psi() = WrapHeading(veh.Psi());
           veh.V() = j[1]["speed"];
           veh.V() = mph2ms(veh.V());
-          //          veh.Drive(.1);
           veh.Steer() = ToMPCSteer(j[1]["steering_angle"]);
-          veh.Throttle() = j[1]["throttle"];
 
-          double dist = Distance(veh.X(), veh.Y(), last_x, last_y);
           double dt = Now() - last_t;
           double acc = (veh.V() - last_v) / dt;
-          printf("%.2f,%.1f,%.2f\n", dt, veh.Throttle(), acc);
           last_v = veh.V();
           last_t = Now();
 
+          veh.Acc() = acc;
+          veh.Drive(dt);
           ProcessData(mpc, waypoints, veh);
           veh.Steer() = mpc.Steer();
-          veh.Throttle() = mpc.Throttle();
+          veh.Acc() = mpc.Acc();
+          double throttle = j[1]["throttle"];
+          if (mpc.Acc() > 0.2)
+            throttle += 0.1;
+          else if (mpc.Acc() < -0.2)
+            throttle -= 0.1;
+
+          printf("%.2f,%.1f,%.2f\n", dt, throttle, acc);
 
           json msgJson;
           msgJson["steering_angle"] = ToSimSteer(veh.Steer());
-          msgJson["throttle"] = veh.Throttle();
+          msgJson["throttle"] = throttle;
 
           // Display the MPC predicted trajectory
           msgJson["mpc_x"] = mpc.Prediction().x;
@@ -150,7 +155,7 @@ int main(int argc, char** argv) {
           //
           // NOTE: REMEMBER TO SET THIS TO 100 MILLISECONDS BEFORE
           // SUBMITTING.
-          //          this_thread::sleep_for(chrono::milliseconds(100));
+          this_thread::sleep_for(chrono::milliseconds(100));
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
         }
       } else {

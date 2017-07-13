@@ -65,7 +65,7 @@ void TestMPC(WayPoints& waypoints) {
     LocalToGlobal(veh.X(), veh.Y(), veh.Psi(), mpc.Prediction().x,
                   mpc.Prediction().y, future_path.x, future_path.y);
     veh.Steer() = mpc.Steer();
-    veh.Throttle() = mpc.Throttle();
+    veh.Acc() = mpc.Acc();
     veh.X() = future_path.x[1];
     veh.Y() = future_path.y[1];
     veh.Psi() += mpc.Prediction().psi[1];
@@ -74,7 +74,7 @@ void TestMPC(WayPoints& waypoints) {
               << "v = " << veh.V() << "\n"
               << "psi = " << veh.Psi() << "\n"
               << "steer = " << veh.Steer() << "\n"
-              << "throttle = " << veh.Throttle() << "\n";
+              << "acc = " << veh.Acc() << "\n";
   }
 
   //  plt::plot(orig_x, orig_y, "r--");

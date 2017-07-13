@@ -23,7 +23,7 @@ class MPC {
 
   const double Steer();
 
-  const double Throttle();
+  const double Acc();
 
   // Predicted vehicle trajectory in vehicle's LOCAL coordinate
   const WayPoints& Prediction() const;
@@ -33,7 +33,7 @@ class MPC {
 
  private:
   double steering_m;
-  double throttle_m;
+  double acc_m;
   WayPoints prediction_m, reference_m;
   const MPCConfig* config_m;
 };

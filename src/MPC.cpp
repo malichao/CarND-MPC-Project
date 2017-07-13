@@ -150,7 +150,7 @@ vector<double> MPC::Solve(const Vehicle& veh, Eigen::VectorXd coeffs) {
   const double& cte = veh.Cte();
   const double& epsi = veh.Epsi();
   const double& delta = veh.Steer();
-  const double& acc = veh.Throttle();
+  const double& acc = veh.Acc();
 
   // number of independent variables
   // N timesteps == N - 1 actuations
@@ -249,7 +249,7 @@ vector<double> MPC::Solve(const Vehicle& veh, Eigen::VectorXd coeffs) {
   //  auto cost = solution.obj_value;
   //  std::cout << "Cost " << cost << std::endl;
   steering_m = solution.x[delta_start];
-  throttle_m = solution.x[a_start];
+  acc_m = solution.x[a_start];
   prediction_m.x.resize(N);
   prediction_m.y.resize(N);
   prediction_m.psi.resize(N);
@@ -268,7 +268,7 @@ void MPC::SetReference(const WayPoints& ref) { reference_m = ref; }
 
 const double MPC::Steer() { return steering_m; }
 
-const double MPC::Throttle() { return throttle_m; }
+const double MPC::Acc() { return acc_m; }
 
 const WayPoints& MPC::Prediction() const { return prediction_m; }
 
