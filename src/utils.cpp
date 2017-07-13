@@ -123,8 +123,19 @@ void LocalToGlobal(const double &veh_x, const double &veh_y,
   }
 }
 
+WayPoints PolyToWaypoints(const Eigen::VectorXd &coeffs, const double &x_start,
+                          const double &x_end, const double &spacing) {
+  WayPoints reference;
+  for (double x = x_start; x < x_end; x += spacing) {
+    reference.x.push_back(x);
+    reference.y.push_back(polyeval(coeffs, x));
+  }
+  return reference;
+}
+
 void ProcessData(MPC &mpc, const WayPoints &waypoints, const Vehicle &veh,
                  MPCConfig &config) {
+  // Step 1 Convert global waypoints into local frame
   WayPoints waypoints_local;
   Eigen::VectorXd ptsx_local(waypoints.x.size());
   Eigen::VectorXd ptsy_local(waypoints.x.size());
@@ -132,26 +143,27 @@ void ProcessData(MPC &mpc, const WayPoints &waypoints, const Vehicle &veh,
   GlobalToLocal(veh.X(), veh.Y(), veh.Psi(), waypoints.x, waypoints.y,
                 waypoints_local.x, waypoints_local.y);
   waypoints_local.ToEigenVector(ptsx_local, ptsy_local);
-  auto coeffs = polyfit(ptsx_local, ptsy_local, 3);
-  WayPoints reference;
-  double step = (ptsx_local[ptsx_local.size() - 1] - ptsx_local[0]) / 10;
-  for (double x = ptsx_local[0], i = 0; i < 20; i++) {
-    reference.x.push_back(x);
-    reference.y.push_back(polyeval(coeffs, x));
-    x += step;
-  }
-  mpc.SetReference(reference);
 
+  // Step 2 Fit the waypoints with 3rd order polynomial
+  auto coeffs = polyfit(ptsx_local, ptsy_local, 3);
+  double x_start = 0;
+  double x_end = ptsx_local[ptsx_local.size() - 1] - ptsx_local[0];
+  mpc.SetReference(PolyToWaypoints(coeffs, x_start, x_end, 2.0));
+  const WayPoints &reference = mpc.Reference();
+
+  // Step 3 Calculate the reference velocit based on road curvature
   double deviation = 0;
   for (int i = 1; i < reference.x.size(); i++) {
     deviation += fabs(atan2(reference.y[i] - reference.y[i - 1],
                             reference.x[i] - reference.x[i - 1]));
   }
-  deviation = std::max(std::min(deviation, 12.0), 4.0);
-  double v_max = (deviation - 4) * (-3.25) + 53;
-  v_max = std::max(std::min(v_max, 53.0), 26.0);
-  config.ref_v = v_max;
-  printf("D%.3f V%.3f ", deviation, ms2mph(v_max));
+  deviation /= reference.x.size();
+  double v_max = mph2ms(120), v_min = mph2ms(65);
+  deviation = std::max(std::min(deviation, .6), .1);
+  double v_ref = v_max - deviation * mph2ms(110);
+  v_ref = std::max(std::min(v_ref, v_max), v_min);
+  config.ref_v = v_ref;
+  printf("D %.3f V %.1f ", deviation, ms2mph(v_ref));
 
   //  double p1_x = 0;
   //  double p1_y = polyeval(coeffs, p1_x);
@@ -167,6 +179,7 @@ void ProcessData(MPC &mpc, const WayPoints &waypoints, const Vehicle &veh,
   //  config.ref_v = v_max;
   //  printf("C%.3f R %.1f V%.1f\n", curv, radius, ms2mph(v_max));
 
+  // Step 4 Solve the optimization problem
   Vehicle veh_local(veh);
   veh_local.X() = 0;
   veh_local.Y() = 0;

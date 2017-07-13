@@ -55,6 +55,10 @@ double Area(const double& a_x, const double& a_y, const double& b_x,
 double Curvature(const double& a_x, const double& a_y, const double& b_x,
                  const double& b_y, const double& c_x, const double& c_y);
 
+// Linearly sample the polynomial line, unit in meter
+WayPoints PolyToWaypoints(const Eigen::VectorXd& coeffs, const double& x_start,
+                          const double& x_end, const double& spacing = 1.0);
+
 void ProcessData(MPC& mpc, const WayPoints& waypoints, const Vehicle& veh,
                  MPCConfig& config);
 // Fit a polynomial.
