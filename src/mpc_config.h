@@ -40,6 +40,8 @@ class MPCConfig {
   double delta_min = -25.0 / 180.0 * M_PI;
   double acc_max = 1.0;
   double acc_min = -1.0;
+  double vx_max = 120;
+  double vx_min = 65;
 };
 
 #endif  // MPC_CONFIG_H

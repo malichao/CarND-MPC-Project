@@ -51,9 +51,11 @@ void MPCConfig::ReadConfig(const std::string file) {
   delta_min = j["r_delta_min"];
   acc_max = j["r_acc_max"];
   acc_min = j["r_acc_min"];
+  vx_max = j["r_vx_max"];
+  vx_min = j["r_vx_min"];
 
-  std::cout<<"------ Configuration ------\n";
-  std::cout << std::setw(2) << j<<"\n";
+  std::cout << "------ Configuration ------\n";
+  std::cout << std::setw(2) << j << "\n";
 }
 
 void MPCConfig::WriteConfig(const std::string file) {
@@ -80,6 +82,8 @@ void MPCConfig::WriteConfig(const std::string file) {
   j["r_delta_min"] = delta_min;
   j["r_acc_max"] = acc_max;
   j["r_acc_min"] = acc_min;
+  j["r_vx_max"] = vx_max;
+  j["r_vx_min"] = vx_min;
 
   out << std::setw(2) << j << std::endl;
 }
