@@ -79,11 +79,8 @@ int main(int argc, char** argv) {
   //  mpc_config.WriteConfig("../config/test.cfg");
   MPC mpc(mpc_config);
 
-  bool disable_vis = false;
-
-  h.onMessage([&mpc, &mpc_config, &disable_vis](uWS::WebSocket<uWS::SERVER> ws,
-                                                char* data, size_t length,
-                                                uWS::OpCode opCode) {
+  h.onMessage([&mpc, &mpc_config](uWS::WebSocket<uWS::SERVER> ws, char* data,
+                                  size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message
     // event.
     // The 4 signifies a websocket message
@@ -133,9 +130,9 @@ int main(int argc, char** argv) {
 
           json msgJson;
           // Just want to see how it looks like in the second lapse.
-          if (ms2mph(veh.V()) > 98) {
-            disable_vis = true;
-          }
+          //          if (ms2mph(veh.V()) > 98) {
+          //            disable_vis = true;
+          //          }
           msgJson["steering_angle"] = ToSimSteer(veh.Steer());
           msgJson["throttle"] = throttle;
           //          printf("A%.2f T%.1f\n", mpc.Acc(), throttle);
@@ -143,24 +140,13 @@ int main(int argc, char** argv) {
           printf("Cost %.1f V %.1f Steer %.1f\n", mpc.Cost(), ms2mph(veh.V()),
                  rad2deg(veh.Steer()));
 
-          if (!disable_vis) {
-            // Display the MPC predicted trajectory
-            msgJson["mpc_x"] = mpc.Prediction().x;
-            msgJson["mpc_y"] = mpc.Prediction().y;
+          // Display the MPC predicted trajectory
+          msgJson["mpc_x"] = mpc.Prediction().x;
+          msgJson["mpc_y"] = mpc.Prediction().y;
 
-            // Display the waypoints/reference line
-            msgJson["next_x"] = mpc.Reference().x;
-            msgJson["next_y"] = mpc.Reference().y;
-          } else {
-            std::vector<double> empty;
-            // Display the MPC predicted trajectory
-            msgJson["mpc_x"] = empty;
-            msgJson["mpc_y"] = empty;
-
-            // Display the waypoints/reference line
-            msgJson["next_x"] = empty;
-            msgJson["next_y"] = empty;
-          }
+          // Display the waypoints/reference line
+          msgJson["next_x"] = mpc.Reference().x;
+          msgJson["next_y"] = mpc.Reference().y;
 
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
           //          std::cout << msg << std::endl;

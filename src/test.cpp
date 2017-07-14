@@ -22,8 +22,8 @@ void TestDrawCenterPath(WayPoints& waypoints) {
       temp.y.push_back(waypoints.y.back());
     }
   }
-  plt::plot(waypoints.x, waypoints.y, "r--");
-  plt::plot(temp.x, temp.y, "g*");
+  //  plt::plot(waypoints.x, waypoints.y, "r--");
+  //  plt::plot(temp.x, temp.y, "g*");
 }
 
 void TestSmooth(WayPoints& waypoints) {
@@ -84,8 +84,12 @@ void TestMPC(WayPoints& waypoints) {
   }
 
   //  plt::plot(orig_x, orig_y, "r--");
-  plt::plot(mpc.Reference().x, mpc.Reference().y, "r--");
-  plt::plot(mpc.Prediction().x, mpc.Prediction().y, "b");
+  //  plt::plot(mpc.Reference().x, mpc.Reference().y, "r--");
+  //  plt::plot(mpc.Prediction().x, mpc.Prediction().y, "b");
+  plt::named_plot("Reference", mpc.Reference().x, mpc.Reference().y, "r--");
+  plt::named_plot("MPC Prediction", mpc.Prediction().x, mpc.Prediction().y,
+                  "b");
+  plt::legend();
   plt::grid(true);
 }
 
@@ -93,16 +97,14 @@ int main() {
   // ...
   WayPoints waypoints;
   TestDrawCenterPath(waypoints);
-  TestSmooth(waypoints);
-  //  size_t test_offset = 51;
-  //  size_t test_size = 6;
-  //  WayPoints test_waypoints;
-  //  test_waypoints.x = std::vector<double>(&waypoints.x[test_offset],
-  //                                         &waypoints.x[test_offset +
-  //                                         test_size]);
-  //  test_waypoints.y = std::vector<double>(&waypoints.y[test_offset],
-  //                                         &waypoints.y[test_offset +
-  //                                         test_size]);
-  //  TestMPC(test_waypoints);
+  //  TestSmooth(waypoints);
+  size_t test_offset = 51;
+  size_t test_size = 6;
+  WayPoints test_waypoints;
+  test_waypoints.x = std::vector<double>(&waypoints.x[test_offset],
+                                         &waypoints.x[test_offset + test_size]);
+  test_waypoints.y = std::vector<double>(&waypoints.y[test_offset],
+                                         &waypoints.y[test_offset + test_size]);
+  TestMPC(test_waypoints);
   plt::show();
 }
