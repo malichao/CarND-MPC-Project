@@ -3,6 +3,7 @@
 #include "matplotlibcpp.h"
 #include "path_smoother.h"
 #include "utils.h"
+#include "vehicle_dynamics.h"
 namespace plt = matplotlibcpp;
 
 void TestDrawCenterPath(WayPoints& waypoints) {
@@ -93,18 +94,49 @@ void TestMPC(WayPoints& waypoints) {
   plt::grid(true);
 }
 
-int main() {
-  // ...
-  WayPoints waypoints;
-  TestDrawCenterPath(waypoints);
-  //  TestSmooth(waypoints);
-  size_t test_offset = 51;
-  size_t test_size = 6;
-  WayPoints test_waypoints;
-  test_waypoints.x = std::vector<double>(&waypoints.x[test_offset],
-                                         &waypoints.x[test_offset + test_size]);
-  test_waypoints.y = std::vector<double>(&waypoints.y[test_offset],
-                                         &waypoints.y[test_offset + test_size]);
-  TestMPC(test_waypoints);
+void TestVehicle() {
+  VehicleDynamics veh_dyn;
+  Vehicle veh;
+  double test_v = 20;
+  double test_steer = deg2rad(0.45);
+  veh.V() = test_v;
+  veh.Steer() = test_steer;
+  veh_dyn.vx = test_v;
+  veh_dyn.steer = test_steer;
+  std::vector<double> x, y;
+  std::vector<double> x1, y1;
+  for (int i = 0; i < 50; i++) {
+    x.push_back(veh.X());
+    y.push_back(veh.Y());
+    x1.push_back(veh_dyn.x);
+    y1.push_back(veh_dyn.y);
+    veh.Drive(0.1);
+    veh_dyn.drive(0.1);
+  }
+  printf("yawr %.3f | yawr %.3f vy %.5f \n", veh.V() / 2.67 * veh.Steer(),
+         veh_dyn.yawr, veh_dyn.vy);
+  plt::ylim(-200, 200);
+  plt::plot(x, y, "r");
+  plt::plot(x1, y1, "b");
+  plt::grid(true);
   plt::show();
+}
+
+int main() {
+  TestVehicle();
+
+  //  WayPoints waypoints;
+  //  TestDrawCenterPath(waypoints);
+  //  //  TestSmooth(waypoints);
+  //  size_t test_offset = 51;
+  //  size_t test_size = 6;
+  //  WayPoints test_waypoints;
+  //  test_waypoints.x = std::vector<double>(&waypoints.x[test_offset],
+  //                                         &waypoints.x[test_offset +
+  //                                         test_size]);
+  //  test_waypoints.y = std::vector<double>(&waypoints.y[test_offset],
+  //                                         &waypoints.y[test_offset +
+  //                                         test_size]);
+  //  TestMPC(test_waypoints);
+  //  plt::show();
 }

@@ -67,6 +67,57 @@ double ToMPCSteer(const double steer) { return -steer; }
 
 double last_t = Now();
 Vehicle veh;
+
+void TestStraight(json& j, uWS::WebSocket<uWS::SERVER>& ws) {
+  static bool init = false;
+  static ofstream log("log.txt");
+  static Vehicle test_veh;
+  double psi = j[1]["psi"];
+  psi = WrapHeading(psi);
+  double x = j[1]["x"];
+  double y = j[1]["y"];
+  double v = mph2ms(j[1]["speed"]);
+  double steer = ToMPCSteer(j[1]["steering_angle"]);
+  double dt = Now() - last_t;
+  double acc = (v - veh.V()) / dt;
+  last_t = Now();
+
+  if (!init) {
+    test_veh.X() = x;
+    test_veh.Y() = y;
+    test_veh.Psi() = psi;
+    init = true;
+  }
+
+  test_veh.V() = v;
+  test_veh.Acc() = acc;
+  test_veh.Steer() = steer;
+  test_veh.Drive2(dt);
+
+  log << x << "," << y << "," << psi << "," << test_veh.X() << ","
+      << test_veh.Y() << "," << test_veh.Psi() << "\n";
+  log.flush();
+  //  cout << x << "," << y << "," << psi << "," << test_veh.X() << ","
+  //       << test_veh.Y() << "," << test_veh.Psi() << "\n";
+
+  json msgJson;
+  msgJson["steering_angle"] = -0.45 / 25.0;
+  msgJson["throttle"] = 1;
+
+  std::vector<double> empty;
+
+  // Display the MPC predicted trajectory
+  msgJson["mpc_x"] = empty;
+  msgJson["mpc_y"] = empty;
+
+  // Display the waypoints/reference line
+  msgJson["next_x"] = empty;
+  msgJson["next_y"] = empty;
+
+  auto msg = "42[\"steer\"," + msgJson.dump() + "]";
+  ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
+}
+
 int main(int argc, char** argv) {
   uWS::Hub h;
 
@@ -94,6 +145,9 @@ int main(int argc, char** argv) {
         //        cout << setw(2) << j << endl;
         string event = j[0].get<string>();
         if (event == "telemetry") {
+          TestStraight(j, ws);
+          return;
+
           // j[1] is the data JSON object
           //          double t1 = WrapHeading(j[1]["psi"]), t2 =
           //          j[1]["psi_unity"];
@@ -122,17 +176,9 @@ int main(int argc, char** argv) {
           veh.Steer() = mpc.Steer();
           veh.Acc() = mpc.Acc();
           double throttle = j[1]["throttle"];
-          //          if (mpc.Acc() > 0.2)
-          //            throttle += 0.1;
-          //          else if (mpc.Acc() < -0.2)
-          //            throttle -= 0.1;
           throttle = mpc.Acc();
 
           json msgJson;
-          // Just want to see how it looks like in the second lapse.
-          //          if (ms2mph(veh.V()) > 98) {
-          //            disable_vis = true;
-          //          }
           msgJson["steering_angle"] = ToSimSteer(veh.Steer());
           msgJson["throttle"] = throttle;
           //          printf("A%.2f T%.1f\n", mpc.Acc(), throttle);

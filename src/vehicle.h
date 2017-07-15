@@ -7,6 +7,7 @@ class Vehicle {
   Vehicle(const double lf);
 
   void Drive(const double dt);
+  void Drive2(const double dt);
   double& X();
   double& Y();
   double& Psi();
@@ -16,18 +17,21 @@ class Vehicle {
   double& Cte();
   double& Epsi();
 
-  const double& X()const ;
-  const double& Y()const ;
-  const double& Psi()const ;
-  const double& V()const ;
-  const double& Steer()const ;
-  const double& Acc()const ;
-  const double& Cte()const ;
-  const double& Epsi()const ;
+  const double& X() const;
+  const double& Y() const;
+  const double& Psi() const;
+  const double& V() const;
+  const double& Steer() const;
+  const double& Acc() const;
+  const double& Cte() const;
+  const double& Epsi() const;
+  double vy, yawr;
 
-private:
+ private:
+  void ComputeDx(double* dx, double* x, double* u, double* p);
+  void ComputeY(double* y, double* x, double* u, double* p);
   Eigen::VectorXd state_m;
-  double Lf_m;  //Wheelbase
+  double Lf_m;  // Wheelbase
 };
 
 #endif  // VEHICLE_H

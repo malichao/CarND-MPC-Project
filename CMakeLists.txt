@@ -16,6 +16,7 @@ set(sources
     src/waypoints
     src/mpc_config.cpp
     src/path_smoother.cpp
+    src/vehicle_dynamics.cpp
 )
 
 include_directories(/usr/local/include)
