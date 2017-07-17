@@ -2,7 +2,11 @@
 ---
 
 ## Overview
-[Todo]
+The goal of this project is to implement a Model Predictive Controller to drive a car as fast as possibly on the track safely in the simulator. The following animation shows how my controller works. The yellow line is the reference path and the green line is the MPC predicted trajectory.
+
+![gif](docs/mpc.gif)
+
+To see the complete video, checkout out [this link](https://youtu.be/8qDJUKbodao).
 
 ## Dependencies
 I created a docker image that includes all the dependencies. Apart from those, I managed to get Qt creator to work in the container so that I could debug my program. To build the image: 
@@ -27,10 +31,8 @@ If you don't want to install this image, then follow [udacity's project repo](ht
 3. Compile: `cmake .. && make`
 4. Run it: `./mpc [path_to_config]`. Config file is optional, by default it loads "config/test.cfg".
 
-
+----
 ## Implementation
-[Todo]
-
 ### MPC
 [Todo]
 
