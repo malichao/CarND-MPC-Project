@@ -134,7 +134,7 @@ Now that we have the model, we need to define the cost function so that the opti
  ![png](docs/mpc_test.png)
     
 ### Latency Handling
-In real life, there is usually a latency bewteen the commmand issue and execution. The latency is negligible when the speed is low but it caused swerving when the car reached 60 mph trying to make a turn at the curve. To compensate the latency, I basically update the vehicle state by an amount of time before feeding into the MPC solver. This process could be found in [main.cpp](src/utils.cpp#L119). This approach worked well for short latency at straight road and under low speed. The following figure shows the dead reckoning result for a long duration, where dashed line is the acutal measurement and solid line is the dead reckoning.
+In real life, there is usually a latency bewteen the commmand issue and execution. The latency is negligible when the speed is low but it caused swerving when the car reached 60 mph trying to make a turn at the curve. To compensate the latency, I basically update the vehicle state by an amount of time before feeding into the MPC solver. This process could be found in [main.cpp](src/main.cpp#L119) at line 119. This approach worked well for short latency at straight road and under low speed. The following figure shows the dead reckoning result for a long duration, where dashed line is the acutal measurement and solid line is the dead reckoning.
 
 ![png](docs/degree_-0.47.png)
 
