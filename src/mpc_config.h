@@ -10,7 +10,7 @@ class MPCConfig {
   void ReadConfig(const std::string file);
   void WriteConfig(const std::string file);
 
-  size_t N = 25;
+  size_t N = 40;
   double dt = 0.05;
   double Lf = 2.67;   // Wheelbase
   double ref_v = 40;  // mph
@@ -26,21 +26,21 @@ class MPCConfig {
   size_t a_start = delta_start + N - 1;
 
   // Weights for the cost function
-  double cte_w = 1.0;
-  double epsi_w = 1.0;
+  double cte_w = 2.50;
+  double epsi_w = 300.0;
   double v_w = 1.0;
   double delta_w = 5000.0;
   double acc_w = 1.0;
-  double delta_dot_w = 5000.0;
-  double acc_dot_w = 100.0;
+  double delta_dot_w = 15000.0;
+  double acc_dot_w = 10.0;
 
   double default_max = 1.0e19;
   double default_min = -1.0e19;
   double delta_max = 25.0 / 180.0 * M_PI;
   double delta_min = -25.0 / 180.0 * M_PI;
-  double acc_max = 1.0;
-  double acc_min = -1.0;
-  double vx_max = 120;
+  double acc_max = 3.0;
+  double acc_min = -0.50;
+  double vx_max = 100;
   double vx_min = 65;
 };
 
