@@ -117,21 +117,24 @@ However, the simulator only provides throttle instead of acceleration. The relat
 
 Now that we have the model, we need to define the cost function so that the optimizer could have a objective to optimze. The cost function is defined as follows.
 
-  cost = A * cte + B * epsi + C * v_error + D * delta_output + E * acc_output + F * delta_change + G * acc_change
+   cost = A * cte + B * epsi + C * v_error + D * delta_output + E * acc_output + F * delta_change + G * acc_change
   
  where,
-    A, B, C, D, E, F, G are the coefficient of each term,  
-    cte is the cross track error,  
-    epsi is the heading error,  
-    v_error is the velocity error,  
-    delta_output is the magnitude of steering,  
-    acc_output is the magnitude of acceleration,  
-    delta_change is the change of sequential steering values,  
-    acc_change is the change of sequential acceleration values  
+ 
+      A, B, C, D, E, F, G are the coefficient of each term,  
+      cte is the cross track error,  
+      epsi is the heading error,  
+      v_error is the velocity error,  
+      delta_output is the magnitude of steering,  
+      acc_output is the magnitude of acceleration,  
+      delta_change is the change of sequential steering values,  
+      acc_change is the change of sequential acceleration values  
     
  The following figure shows the predicted trajectory of given waypoints.  
  ![png](docs/mpc_test.png)
     
 ### Latency Handling
 In real life, there is usually a latency bewteen the commmand issue and execution. The latency is negligible when the speed is low but it caused swerving when the car reached 60 mph trying to make a turn at the curve. To compensate the latency, I basically update the vehicle state by an amount of time before feeding into the MPC solver. This process could be found in [main.cpp](src/utils.cpp#L119). This approach worked well for short latency at straight road and under low speed. The following figure shows the dead reckoning result for a long duration, where dashed line is the acutal measurement and solid line is the dead reckoning.
+
+![png](docs/degree_-0.47.png)
 
