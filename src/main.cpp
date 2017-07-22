@@ -71,12 +71,12 @@ int main(int argc, char** argv) {
   uWS::Hub h;
 
   // MPC is initialized here!
-  std::string config_file = "../config/test.cfg";
+  std::string config_file = "../config/normal.cfg";
   if (argc == 2) {
     config_file = argv[1];
   }
   MPCConfig mpc_config(config_file);
-  //  mpc_config.WriteConfig("../config/test.cfg");
+  //  mpc_config.WriteConfig("../config/normal.cfg");
   MPC mpc(mpc_config);
 
   h.onMessage([&mpc, &mpc_config](uWS::WebSocket<uWS::SERVER> ws, char* data,
