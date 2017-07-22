@@ -1,6 +1,7 @@
 #include "mpc_config.h"
 #include <fstream>
 #include "json.hpp"
+#include "utils.h"
 using json = nlohmann::json;
 
 MPCConfig::MPCConfig() {
@@ -16,6 +17,7 @@ MPCConfig::MPCConfig() {
 
 MPCConfig::MPCConfig(const std::string file) { ReadConfig(file); }
 
+// MMa 2017-07-22 We should convert unit as soon as possible
 void MPCConfig::ReadConfig(const std::string file) {
   try {
     std::cout << " Loading configurations from [" << file << "]\n";
@@ -25,8 +27,8 @@ void MPCConfig::ReadConfig(const std::string file) {
 
     N = j["N"];
     dt = j["dt"];
-    Lf = j["Lf"];        // Wheelbase
-    ref_v = j["ref_v"];  // mph
+    Lf = j["Lf"];                // Wheelbase
+    ref_v = mph2ms(j["ref_v"]);  // mph
 
     // ...
     x_start = 0;
@@ -53,29 +55,32 @@ void MPCConfig::ReadConfig(const std::string file) {
     delta_min = j["r_delta_min"];
     acc_max = j["r_acc_max"];
     acc_min = j["r_acc_min"];
-    vx_max = j["r_vx_max"];
-    vx_min = j["r_vx_min"];
+    vx_max = mph2ms(j["r_vx_max"]);
+    vx_min = mph2ms(j["r_vx_min"]);
+
+    adaptive_speed = j["adaptive_speed"];
 
     std::cout << "------ Configuration ------\n";
     std::cout << std::setw(2) << j << "\n";
   } catch (...) {
     std::cout << "Error loading configurations. Using default settings.\n";
-    std::cout << "cte_w         " << cte_w << "\n"
-              << "epsi_w        " << epsi_w << "\n"
-              << "v_w           " << v_w << "\n"
-              << "delta_w       " << delta_w << "\n"
-              << "acc_w         " << acc_w << "\n"
-              << "delta_dot_w   " << delta_dot_w << "\n"
-              << "acc_dot_w     " << delta_dot_w << "\n"
+    std::cout << "cte_w          " << cte_w << "\n"
+              << "epsi_w         " << epsi_w << "\n"
+              << "v_w            " << v_w << "\n"
+              << "delta_w        " << delta_w << "\n"
+              << "acc_w          " << acc_w << "\n"
+              << "delta_dot_w    " << delta_dot_w << "\n"
+              << "acc_dot_w      " << delta_dot_w << "\n"
 
-              << "default_max   " << default_max << "\n"
-              << "default_min   " << default_min << "\n"
-              << "delta_max     " << delta_max << "\n"
-              << "delta_min     " << delta_min << "\n"
-              << "acc_max       " << acc_max << "\n"
-              << "acc_min       " << acc_min << "\n"
-              << "vx_max        " << vx_max << "\n"
-              << "vx_min        " << vx_min << "\n";
+              << "default_max    " << default_max << "\n"
+              << "default_min    " << default_min << "\n"
+              << "delta_max      " << delta_max << "\n"
+              << "delta_min      " << delta_min << "\n"
+              << "acc_max        " << acc_max << "\n"
+              << "acc_min        " << acc_min << "\n"
+              << "vx_max         " << ms2mph(vx_max) << "\n"
+              << "vx_min         " << ms2mph(vx_min) << "\n"
+              << "adaptive_speed " << adaptive_speed << "\n";
   }
 }
 
@@ -85,8 +90,8 @@ void MPCConfig::WriteConfig(const std::string file) {
 
   j["N"] = N;
   j["dt"] = dt;
-  j["Lf"] = Lf;        // Wheelbase
-  j["ref_v"] = ref_v;  // mph
+  j["Lf"] = Lf;                // Wheelbase
+  j["ref_v"] = ms2mph(ref_v);  // mph
 
   // Weights for the cost function
   j["w_cte"] = cte_w;
@@ -103,8 +108,10 @@ void MPCConfig::WriteConfig(const std::string file) {
   j["r_delta_min"] = delta_min;
   j["r_acc_max"] = acc_max;
   j["r_acc_min"] = acc_min;
-  j["r_vx_max"] = vx_max;
-  j["r_vx_min"] = vx_min;
+  j["r_vx_max"] = ms2mph(vx_max);
+  j["r_vx_min"] = ms2mph(vx_min);
+
+  j["adaptive_speed"] = adaptive_speed;
 
   out << std::setw(2) << j << std::endl;
 }

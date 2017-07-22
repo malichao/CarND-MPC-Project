@@ -152,34 +152,36 @@ void ProcessData(MPC &mpc, const WayPoints &waypoints, const Vehicle &veh,
   const WayPoints &reference = mpc.Reference();
 
   // Step 3 Calculate the reference velocit based on road curvature
-  double deviation = 0;
-  for (int i = 1; i < reference.x.size(); i++) {
-    deviation += fabs(atan2(reference.y[i] - reference.y[i - 1],
-                            reference.x[i] - reference.x[i - 1]));
-  }
-  deviation /= reference.x.size();
-  const double dev_max = 0.6, dev_min = 0.1;
-  deviation = std::max(std::min(deviation, dev_max), dev_min);
-  double v_max = config.vx_max, v_min = config.vx_min;
-  double slope = (v_max - v_min) / (dev_max - dev_min);
-  double v_ref = v_max - deviation * slope;
-  v_ref = std::max(std::min(v_ref, v_max), v_min);
-  config.ref_v = mph2ms(v_ref);
-  //  printf("D %.3f V %.1f ", deviation, v_ref);
+  if (config.adaptive_speed) {
+    double deviation = 0;
+    for (size_t i = 1; i < reference.x.size(); i++) {
+      deviation += fabs(atan2(reference.y[i] - reference.y[i - 1],
+                              reference.x[i] - reference.x[i - 1]));
+    }
+    deviation /= reference.x.size();
+    const double dev_max = 0.6, dev_min = 0.1;
+    deviation = std::max(std::min(deviation, dev_max), dev_min);
+    double v_max = config.vx_max, v_min = config.vx_min;
+    double slope = (v_max - v_min) / (dev_max - dev_min);
+    double v_ref = v_max - deviation * slope;
+    v_ref = std::max(std::min(v_ref, v_max), v_min);
+    config.ref_v = v_ref;
+    //  printf("D %.3f V %.1f ", deviation, v_ref);
 
-  //  double p1_x = 0;
-  //  double p1_y = polyeval(coeffs, p1_x);
-  //  double p2_x = 20;
-  //  double p2_y = polyeval(coeffs, p2_x);
-  //  double p3_x = 40;
-  //  double p3_y = polyeval(coeffs, p2_x);
-  //  double curv = Curvature(p1_x, p1_y, p2_x, p2_y, p3_x, p3_y);
-  //  double radius = 1 / fabs(curv);
-  //  double acc_y_max = 5;
-  //  double v_max = sqrt(acc_y_max / fabs(curv));
-  //  v_max = std::max(std::min(v_max, 67.0), 29.0);
-  //  config.ref_v = v_max;
-  //  printf("C%.3f R %.1f V%.1f\n", curv, radius, ms2mph(v_max));
+    //  double p1_x = 0;
+    //  double p1_y = polyeval(coeffs, p1_x);
+    //  double p2_x = 20;
+    //  double p2_y = polyeval(coeffs, p2_x);
+    //  double p3_x = 40;
+    //  double p3_y = polyeval(coeffs, p2_x);
+    //  double curv = Curvature(p1_x, p1_y, p2_x, p2_y, p3_x, p3_y);
+    //  double radius = 1 / fabs(curv);
+    //  double acc_y_max = 5;
+    //  double v_max = sqrt(acc_y_max / fabs(curv));
+    //  v_max = std::max(std::min(v_max, 67.0), 29.0);
+    //  config.ref_v = v_max;
+    //  printf("C%.3f R %.1f V%.1f\n", curv, radius, ms2mph(v_max));
+  }
 
   // Step 4 Solve the optimization problem
   Vehicle veh_local(veh);
