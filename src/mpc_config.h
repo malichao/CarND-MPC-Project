@@ -12,10 +12,8 @@ class MPCConfig {
 
   size_t N = 40;
   double dt = 0.05;
-  double Lf = 2.67;   // Wheelbase
-  double ref_v = 40;  // mph
+  double Lf = 2.67;  // Wheelbase
 
-  // ...
   size_t x_start = 0;
   size_t y_start = x_start + N;
   size_t psi_start = y_start + N;
@@ -40,8 +38,11 @@ class MPCConfig {
   double delta_min = -25.0 / 180.0 * M_PI;
   double acc_max = 3.0;
   double acc_min = -0.50;
-  double vx_max = 100;
-  double vx_min = 65;
+  double vx_max = 80;
+  double vx_min = 50;
+
+  double ref_v = 50;  // mph
+  bool adaptive_speed = false;
 };
 
 #endif  // MPC_CONFIG_H
