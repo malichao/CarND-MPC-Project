@@ -53,11 +53,11 @@ RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selectio
 	apt-get install -y gfortran pkg-config && bash install_ipopt.sh Ipopt-3.12.7 
 
 # Install CppAD
-RUN wget http://www.coin-or.org/download/source/CppAD/cppad-20170708.gpl.tgz && \
-	tar xf cppad-20170708.gpl.tgz && rm cppad-20170708.gpl.tgz && ldconfig
+RUN wget http://www.coin-or.org/download/source/CppAD/cppad-20170701.gpl.tgz && \
+	tar xf cppad-20170701.gpl.tgz && rm cppad-20170701.gpl.tgz && ldconfig
 
 RUN ln -s /usr/lib/x86_64-linux-gnu/libgfortran.so.3 /usr/lib/libgfortran.so &&\
-	cd cppad-20170708 && mkdir build && cd build &&\
+	cd cppad-20170701 && mkdir build && cd build &&\
 cmake 										\
     -D CMAKE_VERBOSE_MAKEFILE=YES						\
     -G "Unix Makefiles"							   	\
