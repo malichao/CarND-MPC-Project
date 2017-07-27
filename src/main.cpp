@@ -1,6 +1,7 @@
 #include <math.h>
 #include <uWS/uWS.h>
 #include <chrono>
+#include <deque>
 #include <iostream>
 #include <thread>
 #include <vector>
@@ -11,7 +12,6 @@
 #include "mpc_config.h"
 #include "path_smoother.h"
 #include "utils.h"
-
 // for convenience
 using json = nlohmann::json;
 using namespace std;
@@ -67,6 +67,35 @@ double ToMPCSteer(const double steer) { return -steer; }
 
 double last_t = Now();
 Vehicle veh;
+std::deque<double> dist_que;
+std::deque<double> dt_que;
+double last_x = 0, last_y = 0, last_v = 0;
+
+double CalculateAcc(const double x, const double y, const double dt) {
+  double dist = Distance(x, y, last_x, last_y);
+  last_x = x;
+  last_y = y;
+
+  dist_que.push_back(dist);
+  dt_que.push_back(dt);
+  double acc = 0;
+  if (dist_que.size() > 5) {
+    // Pop the old data first to avoid the wrong initial value
+    dist_que.pop_front();
+    dt_que.pop_front();
+    double v = 0;
+    double dist = 0, dt = 0;
+    for (int i = 0; i < dist_que.size(); i++) {
+      dist += dist_que[i];
+      dt += dt_que[i];
+    }
+    v = dist / dt;
+    acc = (v - last_v) / dt;
+    last_v = v;
+  }
+  return acc;
+}
+
 int main(int argc, char** argv) {
   uWS::Hub h;
 
@@ -103,44 +132,45 @@ int main(int argc, char** argv) {
           //          smoother.smooth(waypoints, waypoints);
 
           double psi = j[1]["psi"];
+          double x = j[1]["x"];
+          double y = j[1]["y"];
           psi = WrapHeading(psi);
 
           double v = mph2ms(j[1]["speed"]);
           double dt = Now() - last_t;
-          double acc = (v - veh.V()) / dt;
           last_t = Now();
 
-          veh.X() = j[1]["x"];
-          veh.Y() = j[1]["y"];
+          double acc = CalculateAcc(x, y, dt);
+
+          veh.X() = x;
+          veh.Y() = y;
           veh.V() = v;
           veh.Psi() = psi;
           veh.Acc() = acc;
           veh.Steer() = ToMPCSteer(j[1]["steering_angle"]);
 
+          printf("v %.1f vehv %.1f acc %.1f\n", v, veh.V(), veh.Acc());
           // Propagate the vehicle state by some time to compensate the latency
-          veh.Drive(dt);
+          veh.Drive2(dt);
 
-          ProcessData(mpc, waypoints, veh, mpc_config);
+          double t1 = Now();
+          ProcessData(mpc, waypoints, veh, mpc_config, dt);
+          double process_time = Now() - t1;
+
           veh.Steer() = mpc.Steer();
           veh.Acc() = mpc.Acc();
           double throttle = j[1]["throttle"];
-          //          if (mpc.Acc() > 0.2)
-          //            throttle += 0.1;
-          //          else if (mpc.Acc() < -0.2)
-          //            throttle -= 0.1;
           throttle = mpc.Acc();
 
           json msgJson;
-          // Just want to see how it looks like in the second lapse.
-          //          if (ms2mph(veh.V()) > 98) {
-          //            disable_vis = true;
-          //          }
           msgJson["steering_angle"] = ToSimSteer(veh.Steer());
           msgJson["throttle"] = throttle;
           //          printf("A%.2f T%.1f\n", mpc.Acc(), throttle);
 
-          printf("Cost %.1f Vref %.1f Steer %.1f Freq %.1f\n", mpc.Cost(),
-                 ms2mph(veh.V()), rad2deg(veh.Steer()), 1.0 / dt);
+          //          printf("Cost %.1f Vref %.1f Steer %.1f Lag %.2f Freq %.1f
+          //          t %.3f\n", mpc.Cost(),
+          //                 ms2mph(veh.V()),rad2deg(veh.Steer()), dt,  1.0 /
+          //                 dt,process_time);
 
           // Display the MPC predicted trajectory
           msgJson["mpc_x"] = mpc.Prediction().x;

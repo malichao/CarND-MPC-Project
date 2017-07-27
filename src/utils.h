@@ -59,8 +59,8 @@ double Curvature(const double& a_x, const double& a_y, const double& b_x,
 WayPoints PolyToWaypoints(const Eigen::VectorXd& coeffs, const double& x_start,
                           const double& x_end, const double& spacing = 1.0);
 
-void ProcessData(MPC& mpc, const WayPoints& waypoints, const Vehicle& veh,
-                 MPCConfig& config);
+void ProcessData(MPC& mpc, const WayPoints& waypoints, Vehicle veh,
+                 MPCConfig& config,const double latency=0);
 // Fit a polynomial.
 // Adapted from
 // https://github.com/JuliaMath/Polynomials.jl/blob/master/src/Polynomials.jl#L676-L716

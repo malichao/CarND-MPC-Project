@@ -7,6 +7,9 @@ class Vehicle {
   Vehicle(const double lf);
 
   void Drive(const double dt);
+
+  void Drive2(const double dt);
+
   double& X();
   double& Y();
   double& Psi();

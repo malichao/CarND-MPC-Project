@@ -133,8 +133,8 @@ WayPoints PolyToWaypoints(const Eigen::VectorXd &coeffs, const double &x_start,
   return reference;
 }
 
-void ProcessData(MPC &mpc, const WayPoints &waypoints, const Vehicle &veh,
-                 MPCConfig &config) {
+void ProcessData(MPC &mpc, const WayPoints &waypoints, Vehicle veh,
+                 MPCConfig &config, const double latency) {
   // Step 1 Convert global waypoints into local frame
   WayPoints waypoints_local;
   Eigen::VectorXd ptsx_local(waypoints.x.size());
@@ -143,6 +143,8 @@ void ProcessData(MPC &mpc, const WayPoints &waypoints, const Vehicle &veh,
   GlobalToLocal(veh.X(), veh.Y(), veh.Psi(), waypoints.x, waypoints.y,
                 waypoints_local.x, waypoints_local.y);
   waypoints_local.ToEigenVector(ptsx_local, ptsy_local);
+
+  veh.Drive(.15);
 
   // Step 2 Fit the waypoints with 3rd order polynomial
   auto coeffs = polyfit(ptsx_local, ptsy_local, 3);

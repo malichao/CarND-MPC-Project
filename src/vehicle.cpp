@@ -6,7 +6,14 @@ Vehicle::Vehicle(const double lf) : state_m(8),Lf_m(lf) {}
 void Vehicle::Drive(const double dt) {
     X() = X() +V()* cos(Psi()) * dt;
     Y() = Y() +V()* sin(Psi()) * dt;
-    Psi() = Psi() +V()/ Lf_m * Steer() * dt;
+    Psi() = Psi() +V()/ Lf_m * tan(Steer()) * dt;
+    V() = V()+ Acc() * dt;
+}
+
+void Vehicle::Drive2(const double dt) {
+    X() = X() +V()* cos(Psi()) * dt;
+    Y() = Y() +V()* sin(Psi()) * dt;
+    Psi() = Psi() +V()/ Lf_m * tan(Steer()) * dt;
     V() = V()+ Acc() * dt;
 }
 
