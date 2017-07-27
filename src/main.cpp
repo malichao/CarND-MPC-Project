@@ -149,9 +149,9 @@ int main(int argc, char** argv) {
           veh.Acc() = acc;
           veh.Steer() = ToMPCSteer(j[1]["steering_angle"]);
 
-          printf("v %.1f vehv %.1f acc %.1f\n", v, veh.V(), veh.Acc());
+          // printf("v %.1f vehv %.1f acc %.1f\n", v, veh.V(), veh.Acc());
           // Propagate the vehicle state by some time to compensate the latency
-          veh.Drive2(dt);
+          veh.Drive(dt);
 
           double t1 = Now();
           ProcessData(mpc, waypoints, veh, mpc_config, dt);
@@ -159,18 +159,17 @@ int main(int argc, char** argv) {
 
           veh.Steer() = mpc.Steer();
           veh.Acc() = mpc.Acc();
-          double throttle = j[1]["throttle"];
-          throttle = mpc.Acc();
 
           json msgJson;
           msgJson["steering_angle"] = ToSimSteer(veh.Steer());
-          msgJson["throttle"] = throttle;
+          msgJson["throttle"] = veh.Acc();
           //          printf("A%.2f T%.1f\n", mpc.Acc(), throttle);
 
-          //          printf("Cost %.1f Vref %.1f Steer %.1f Lag %.2f Freq %.1f
-          //          t %.3f\n", mpc.Cost(),
-          //                 ms2mph(veh.V()),rad2deg(veh.Steer()), dt,  1.0 /
-          //                 dt,process_time);
+          printf(
+              "Cost %.1f Vref %.1f v %.1f Steer %.1f Lag %.2f Freq %.1ft "
+              "%.3f\n ",
+              mpc.Cost(), ms2mph(mpc_config.ref_v), ms2mph(veh.V()),
+              rad2deg(veh.Steer()), dt, 1.0 / dt, process_time);
 
           // Display the MPC predicted trajectory
           msgJson["mpc_x"] = mpc.Prediction().x;

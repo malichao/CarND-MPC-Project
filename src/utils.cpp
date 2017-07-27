@@ -144,8 +144,6 @@ void ProcessData(MPC &mpc, const WayPoints &waypoints, Vehicle veh,
                 waypoints_local.x, waypoints_local.y);
   waypoints_local.ToEigenVector(ptsx_local, ptsy_local);
 
-  veh.Drive(.15);
-
   // Step 2 Fit the waypoints with 3rd order polynomial
   auto coeffs = polyfit(ptsx_local, ptsy_local, 3);
   double x_start = 0;

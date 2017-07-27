@@ -63,7 +63,9 @@ void MPCConfig::ReadConfig(const std::string file) {
     std::cout << "------ Configuration ------\n";
     std::cout << std::setw(2) << j << "\n";
   } catch (...) {
-    std::cout << "Error loading configurations. Using default settings.\n";
+    std::cout << "Warning! Could not load configurations.\n"
+              << "Using default settings.\n"
+              << "------ Configuration ------\n";
     std::cout << "cte_w          " << cte_w << "\n"
               << "epsi_w         " << epsi_w << "\n"
               << "v_w            " << v_w << "\n"
@@ -78,9 +80,13 @@ void MPCConfig::ReadConfig(const std::string file) {
               << "delta_min      " << delta_min << "\n"
               << "acc_max        " << acc_max << "\n"
               << "acc_min        " << acc_min << "\n"
-              << "vx_max         " << ms2mph(vx_max) << "\n"
-              << "vx_min         " << ms2mph(vx_min) << "\n"
-              << "adaptive_speed " << adaptive_speed << "\n";
+              << "vx_max         " << vx_max << "\n"  // mph
+              << "vx_min         " << vx_min << "\n"  // mph
+              << "adaptive_speed " << adaptive_speed << "\n"
+              << "ref_v          " << ref_v << "\n";  // mph
+    ref_v = mph2ms(ref_v);
+    vx_max = mph2ms(vx_max);
+    vx_min = mph2ms(vx_min);
   }
 }
 
