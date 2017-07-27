@@ -7,4 +7,4 @@ sudo docker build \
   --build-arg gid=$group_id\
   --build-arg home=$HOME\
   --build-arg shell=$SHELL\
-  -f carnd-term2.Dockerfile -t carnd-term2-base .
+  -f carnd-term2.Dockerfile -t carnd-term2 .
