@@ -85,7 +85,7 @@ double CalculateAcc(const double x, const double y, const double dt) {
     dt_que.pop_front();
     double v = 0;
     double dist = 0, dt = 0;
-    for (int i = 0; i < dist_que.size(); i++) {
+    for (size_t i = 0; i < dist_que.size(); i++) {
       dist += dist_que[i];
       dt += dt_que[i];
     }

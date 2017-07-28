@@ -35,7 +35,6 @@ add_executable(mpc src/main.cpp ${sources} )
 target_link_libraries(mpc ipopt z ssl uv uWS)
 
 
-add_executable(test1 src/test.cpp ${sources})
-
-target_link_libraries(test1 ipopt python2.7)
+# add_executable(test1 src/test.cpp ${sources})
+# target_link_libraries(test1 ipopt python2.7)
 
